@@ -4,7 +4,7 @@
  */
 
 const config = require('../config/config');
-const database = require('../config/database');
+const database = require('../config/hybrid-database');
 const jwtAuth = require('../lib/jwt-auth');
 const { AuthenticationError, AuthorizationError } = require('./error');
 

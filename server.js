@@ -13,7 +13,7 @@ const rateLimit = require('express-rate-limit');
 // Import configuration and utilities
 const config = require('./config/config');
 const logger = require('./utils/logger');
-const database = require('./config/database');
+const database = require('./config/hybrid-database');
 
 // Import middleware
 const { addSecurityHeaders, handleAuthError } = require('./middleware/auth');
@@ -91,16 +91,6 @@ app.use(handleAuthError);
 app.use(errorHandler);
 app.use(notFoundHandler);
 
-// Graceful shutdown handling
-process.on('SIGTERM', () => {
-    logger.info('SIGTERM received, shutting down gracefully');
-    process.exit(0);
-});
-
-process.on('SIGINT', () => {
-    logger.info('SIGINT received, shutting down gracefully');
-    process.exit(0);
-});
 
 // Unhandled promise rejection handling
 process.on('unhandledRejection', (reason, promise) => {
@@ -113,23 +103,52 @@ process.on('uncaughtException', (error) => {
     process.exit(1);
 });
 
-// Start server
-const server = app.listen(config.server.port, () => {
-    logger.info('Server started successfully', {
-        port: config.server.port,
-        environment: config.server.nodeEnv,
-        version: config.api.version
-    });
-    
-    console.log(`🚀 Server running on port ${config.server.port}`);
-    console.log(`🌍 Environment: ${config.server.nodeEnv}`);
-    console.log(`📖 API Version: ${config.api.version}`);
-    console.log(`🔗 Visit http://localhost:${config.server.port} to get started`);
-    
-    // Log system statistics
-    const stats = database.getStats();
-    logger.info('System initialized', stats);
-});
+// Initialize database and start server
+async function startServer() {
+    try {
+        // Initialize hybrid database
+        await database.initialize();
+        
+        // Start server
+        const server = app.listen(config.server.port, () => {
+            logger.info('Server started successfully', {
+                port: config.server.port,
+                environment: config.server.nodeEnv,
+                version: config.api.version
+            });
+            
+            console.log(`🚀 Server running on port ${config.server.port}`);
+            console.log(`🌍 Environment: ${config.server.nodeEnv}`);
+            console.log(`📖 API Version: ${config.api.version}`);
+            console.log(`🔗 Visit http://localhost:${config.server.port} to get started`);
+            
+            // Log system statistics
+            database.getStats().then(stats => {
+                logger.info('System initialized', stats);
+            });
+        });
+
+        // Graceful shutdown handling
+        const gracefulShutdown = async (signal) => {
+            logger.info(`${signal} received, shutting down gracefully`);
+            
+            server.close(async () => {
+                await database.shutdown();
+                process.exit(0);
+            });
+        };
+
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+    } catch (error) {
+        logger.error('Failed to start server', { error: error.message });
+        process.exit(1);
+    }
+}
+
+// Start the server
+startServer();
 
 // Export app for testing
 module.exports = app;
