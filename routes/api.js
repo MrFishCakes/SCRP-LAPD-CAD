@@ -6,24 +6,44 @@
 const express = require('express');
 const SonoranAPI = require('../lib/sonoran-api');
 const config = require('../config/config');
-const database = require('../config/database');
-const { requireAuth, logApiUsage, addUserInfo, validateApiRequest } = require('../middleware/auth');
+const database = require('../config/hybrid-database');
+const { checkCookieAuth } = require('../middleware/simple-auth');
 const { asyncHandler, ValidationError, ExternalServiceError } = require('../middleware/error');
 
 const router = express.Router();
 
 // Initialize SonoranCAD API
 const sonoranAPI = new SonoranAPI(
-    config.sonoran.apiId,
+    config.sonoran.communityId,
     config.sonoran.apiKey,
-    config.sonoran.communityId
+    
 );
 
 // Apply middleware to all API routes
-router.use(requireAuth);
-router.use(logApiUsage);
-router.use(addUserInfo);
-router.use(validateApiRequest);
+router.use(checkCookieAuth);
+router.use((req, res, next) => {
+    // Check if authentication is valid
+    if (req.authStatus !== 'valid') {
+        return res.status(401).json({
+            success: false,
+            error: {
+                message: 'Authentication required',
+                statusCode: 401,
+                type: 'AuthenticationError'
+            }
+        });
+    }
+    
+    // Add user info to request
+    req.userInfo = {
+        id: req.user.discordId,
+        username: req.user.username,
+        isAuthenticated: true,
+        authMethod: 'cookie'
+    };
+    
+    next();
+});
 
 /**
  * Test API connection
@@ -44,16 +64,147 @@ router.get('/test', asyncHandler(async (req, res) => {
  * Get active units
  */
 router.get('/active-units', asyncHandler(async (req, res) => {
-    const units = await sonoranAPI.getActiveUnits();
-    res.json(units);
+    try {
+        const lapdOnly = req.query.lapdOnly === 'true';
+        const serverId = req.query.serverId || 1;
+        const onlyUnits = req.query.onlyUnits === 'true';
+        const includeOffline = req.query.includeOffline === 'true';
+        const limit = req.query.limit || 100;
+        const offset = req.query.offset || 0;
+
+        const units = await sonoranAPI.getActiveUnits(lapdOnly, serverId, onlyUnits, includeOffline, limit, offset);
+        res.json({
+            data: units
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve active units',
+            error: error.message,
+            errorDetails: {
+                name: error.name,
+                stack: error.stack,
+                cause: error.cause
+            },
+            timestamp: new Date().toISOString()
+        });
+    }
 }));
 
 /**
  * Get all calls/dispatches
  */
 router.get('/calls', asyncHandler(async (req, res) => {
-    const calls = await sonoranAPI.getCalls();
-    res.json(calls);
+    try {
+        const calls = await sonoranAPI.getCalls();
+        res.json({
+            success: true,
+            message: 'Calls retrieved successfully',
+            data: calls,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve calls',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+}));
+
+/**
+ * Get all dispatches (non-911 calls)
+ */
+router.get('/dispatches', asyncHandler(async (req, res) => {
+    try {
+        const dispatches = await sonoranAPI.getDispatches();
+        res.json({
+            success: true,
+            message: 'Dispatches retrieved successfully',
+            data: dispatches,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve dispatches',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+}));
+
+/**
+ * Get call history
+ */
+router.get('/call-history', asyncHandler(async (req, res) => {
+    try {
+        const history = await sonoranAPI.getCallHistory();
+        res.json({
+            success: true,
+            message: 'Call history retrieved successfully',
+            data: history,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve call history',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+}));
+
+/**
+ * Get all calls (alternative endpoint)
+ */
+router.get('/all-calls', asyncHandler(async (req, res) => {
+    try {
+        const calls = await sonoranAPI.getAllCalls();
+        res.json({
+            success: true,
+            message: 'All calls retrieved successfully',
+            data: calls,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve all calls',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+}));
+
+/**
+ * Get active calls only
+ */
+router.get('/active-calls', asyncHandler(async (req, res) => {
+    try {
+        const calls = await sonoranAPI.getActiveCalls();
+        res.json({
+            success: true,
+            message: 'Active calls retrieved successfully',
+            data: calls,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve active calls',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 }));
 
 /**
@@ -218,8 +369,23 @@ router.get('/account/:username', asyncHandler(async (req, res) => {
  * Get all accounts
  */
 router.get('/accounts', asyncHandler(async (req, res) => {
-    const result = await sonoranAPI.getAccounts();
-    res.json(result);
+    try {
+        const result = await sonoranAPI.getAccounts();
+        res.json({
+            success: true,
+            message: 'Accounts retrieved successfully',
+            data: result,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve accounts',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 }));
 
 /**
@@ -250,8 +416,23 @@ router.post('/add-blip', asyncHandler(async (req, res) => {
  * Get all map blips
  */
 router.get('/map-blips', asyncHandler(async (req, res) => {
-    const result = await sonoranAPI.getMapBlips();
-    res.json(result);
+    try {
+        const result = await sonoranAPI.getMapBlips();
+        res.json({
+            success: true,
+            message: 'Map blips retrieved successfully',
+            data: result,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Return the actual error response from SonoranCAD
+        res.json({
+            success: false,
+            message: 'Failed to retrieve map blips',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 }));
 
 /**
@@ -272,32 +453,15 @@ router.delete('/remove-blip/:blipId', asyncHandler(async (req, res) => {
  * Get user's API usage statistics
  */
 router.get('/stats', asyncHandler(async (req, res) => {
-    const logs = database.getApiLogs(req.userInfo.id, 100);
-    
+    // Simplified stats since we don't have API logging in the current system
     const stats = {
-        totalCalls: logs.length,
+        totalCalls: 0,
         callsByEndpoint: {},
         callsByStatus: {},
         averageResponseTime: 0,
-        lastCall: logs.length > 0 ? logs[logs.length - 1].timestamp : null
+        lastCall: null,
+        message: 'API logging not implemented in current system'
     };
-    
-    let totalResponseTime = 0;
-    
-    logs.forEach(log => {
-        // Count by endpoint
-        stats.callsByEndpoint[log.endpoint] = (stats.callsByEndpoint[log.endpoint] || 0) + 1;
-        
-        // Count by status
-        stats.callsByStatus[log.status] = (stats.callsByStatus[log.status] || 0) + 1;
-        
-        // Sum response times
-        totalResponseTime += log.responseTime;
-    });
-    
-    if (logs.length > 0) {
-        stats.averageResponseTime = Math.round(totalResponseTime / logs.length);
-    }
     
     res.json({
         success: true,
@@ -309,20 +473,24 @@ router.get('/stats', asyncHandler(async (req, res) => {
  * Get system statistics
  */
 router.get('/system-stats', asyncHandler(async (req, res) => {
-    const dbStats = database.getStats();
+    // Get basic database stats
+    const userCount = database.getUserCount ? database.getUserCount() : 0;
     
     res.json({
         success: true,
         stats: {
-            ...dbStats,
+            database: {
+                userCount: userCount,
+                type: 'SQLite'
+            },
             sonoranAPI: {
                 apiId: config.sonoran.apiId,
                 communityId: config.sonoran.communityId,
-                baseUrl: config.sonoran.baseUrl
+                baseUrl: 'https://api.sonoransoftware.com'
             },
             server: {
                 nodeEnv: config.server.nodeEnv,
-                version: config.api.version
+                version: '1.0.0'
             }
         }
     });

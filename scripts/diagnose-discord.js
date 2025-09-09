@@ -124,7 +124,7 @@ function generateSetupInstructions() {
     console.log('   ✅ identify');
     console.log('   ✅ guilds');
     
-    console.log('\5. (Optional) For role verification:');
+    console.log('\n5. (Optional) For role verification:');
     console.log('   - Create a bot in the Bot section');
     console.log('   - Copy bot token to DISCORD_BOT_TOKEN');
     console.log('   - Invite bot to your server with appropriate permissions');

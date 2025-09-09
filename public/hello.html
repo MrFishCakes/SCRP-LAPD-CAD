@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 50%, #1a365d 100%);
+            color: white;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="badge" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,215,0,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23badge)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(145deg, rgba(26, 54, 93, 0.95) 0%, rgba(44, 82, 130, 0.95) 100%);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 
+                        0 0 0 1px rgba(255, 215, 0, 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .success-badge {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #22c55e, #16a34a);
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 8px 16px rgba(34, 197, 94, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin: 0 0 1rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-text {
+            font-size: 1.2rem;
+            margin: 0 0 2rem 0;
+            color: #e2e8f0;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #22c55e;
+        }
+        
+        .status-indicator::before {
+            content: '●';
+            color: #22c55e;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .logout-btn {
+            margin-top: 2rem;
+            padding: 12px 25px;
+            background: linear-gradient(145deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.8));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(145deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 1;
+        }
+        
+        .api-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .api-section h3 {
+            margin: 0 0 1rem 0;
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .api-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .api-btn {
+            padding: 10px 15px;
+            background: linear-gradient(145deg, rgba(26, 54, 93, 0.8), rgba(44, 82, 130, 0.8));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .api-btn:hover {
+            background: linear-gradient(145deg, rgba(44, 82, 130, 0.9), rgba(26, 54, 93, 0.9));
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .api-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .api-response {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffd700;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-badge">✓</div>
+        <h1>Access Granted</h1>
+        <div class="status-indicator">Authentication Successful</div>
+        <p class="welcome-text">Welcome to the SCRP LAPD CAD System.<br>You are successfully authenticated and authorized to proceed.</p>
+        
+        <div class="api-section">
+            <h3>🔧 SonoranCAD API Testing</h3>
+            <div class="api-buttons">
+                <button class="api-btn" onclick="testAPI('test')">🔗 Test Connection</button>
+                <button class="api-btn" onclick="testAPI('active-units')">👮 Active Units</button>
+                <button class="api-btn" onclick="testAPI('calls')">📞 Get Calls</button>
+                <button class="api-btn" onclick="testAPI('all-calls')">📞 All Calls</button>
+                <button class="api-btn" onclick="testAPI('active-calls')">🚨 Active Calls</button>
+                <button class="api-btn" onclick="testAPI('dispatches')">🚨 Dispatches</button>
+                <button class="api-btn" onclick="testAPI('call-history')">📋 Call History</button>
+                <button class="api-btn" onclick="testAPI('accounts')">👥 Get Accounts</button>
+                <button class="api-btn" onclick="testAPI('map-blips')">📍 Map Blips</button>
+                <button class="api-btn" onclick="testAPI('stats')">📊 API Stats</button>
+                <button class="api-btn" onclick="testAPI('system-stats')">⚙️ System Stats</button>
+                <button class="api-btn" onclick="clearResponse()">🗑️ Clear Response</button>
+            </div>
+            <div id="api-response" class="api-response"></div>
+        </div>
+        
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+    <div class="footer">
+        Los Angeles Police Department • Computer Aided Dispatch
+    </div>
+
+    <script>
+        function logout() {
+            fetch('/auth/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/';
+                });
+        }
+    </script>
+</body>
+</html>
+

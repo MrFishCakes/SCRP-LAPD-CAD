@@ -163,10 +163,24 @@ function errorHandler(err, req, res, next) {
 
 /**
  * 404 handler for undefined routes
+ * Redirects to /hello for web pages, returns JSON for API routes
  */
 function notFoundHandler(req, res, next) {
-    const error = new NotFoundError(`Route ${req.originalUrl} not found`);
-    next(error);
+    // Check if this is an API route or web page request
+    const isApiRoute = req.originalUrl.startsWith('/api/') || req.originalUrl.startsWith('/auth/');
+    const isStaticFile = req.originalUrl.includes('.') && !req.originalUrl.endsWith('/');
+    
+    if (isApiRoute) {
+        // For API routes, return JSON error
+        const error = new NotFoundError(`Route ${req.originalUrl} not found`);
+        next(error);
+    } else if (isStaticFile) {
+        // For static files (like favicon.ico), return 404
+        res.status(404).send('File not found');
+    } else {
+        // For web pages, redirect to /hello
+        res.redirect('/hello');
+    }
 }
 
 /**

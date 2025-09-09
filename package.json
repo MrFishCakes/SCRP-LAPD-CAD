@@ -8,12 +8,18 @@
     "dev": "nodemon server.js",
     "setup": "node scripts/setup.js",
     "diagnose": "node scripts/diagnose-discord.js",
+    "bypass-rate-limit": "node scripts/bypass-rate-limit.js",
+    "view-tracking": "node scripts/view-user-tracking.js",
+    "test-simple-cookie": "node scripts/test-simple-cookie.js",
+        "view-users": "node scripts/view-users.js",
+        "rebuild-db": "node scripts/rebuild-database.js",
     "test-db": "node scripts/test-hybrid-db.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "axios": "^1.6.0",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
     "better-sqlite3": "^12.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

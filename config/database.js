@@ -24,13 +24,7 @@ class Database {
         return this.users.get(userId);
     }
 
-    updateUserLastLogin(userId) {
-        const user = this.users.get(userId);
-        if (user) {
-            user.lastLogin = new Date();
-            this.users.set(userId, user);
-        }
-    }
+    // updateUserLastLogin method removed - not needed with simplified schema
 
     // Session management
     saveSession(sessionId, sessionData) {

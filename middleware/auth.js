@@ -38,8 +38,7 @@ function requireAuth(req, res, next) {
                 authMethod: 'token'
             };
             
-            // Update user's last activity
-            database.updateUserLastLogin(user.id);
+            // User activity tracking removed - not needed with simplified schema
             return next();
         } catch (error) {
             return res.status(401).json({
@@ -55,8 +54,7 @@ function requireAuth(req, res, next) {
     
     // Fallback to session-based authentication
     if (req.isAuthenticated()) {
-        // Update user's last activity
-        database.updateUserLastLogin(req.user.id);
+        // User activity tracking removed - not needed with simplified schema
         req.userInfo = {
             id: req.user.id,
             username: req.user.username,

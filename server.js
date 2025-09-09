@@ -1,6 +1,6 @@
 /**
  * SonoranCAD Web Application
- * Main server file with modular architecture
+ * Main server file with simple cookie-based authentication
  */
 
 const express = require('express');
@@ -9,6 +9,7 @@ const passport = require('passport');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 // Import configuration and utilities
 const config = require('./config/config');
@@ -16,7 +17,6 @@ const logger = require('./utils/logger');
 const database = require('./config/hybrid-database');
 
 // Import middleware
-const { addSecurityHeaders, handleAuthError } = require('./middleware/auth');
 const { errorHandler, notFoundHandler } = require('./middleware/error');
 
 // Import routes
@@ -30,8 +30,10 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security middleware
-app.use(helmet(config.security.helmet));
-app.use(addSecurityHeaders);
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for development
+    crossOriginEmbedderPolicy: false
+}));
 
 // CORS configuration
 app.use(cors({
@@ -43,8 +45,8 @@ app.use(cors({
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: config.security.rateLimit.windowMs,
-    max: config.security.rateLimit.max,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
     message: {
         success: false,
         error: {
@@ -61,13 +63,26 @@ app.use(limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // Session configuration
-app.use(session(config.session));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
 
 // Passport configuration
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Static files
+app.use(express.static('public'));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -75,7 +90,15 @@ app.use((req, res, next) => {
     
     res.on('finish', () => {
         const responseTime = Date.now() - startTime;
-        logger.logRequest(req, res, responseTime);
+        logger.info(`${req.method} ${req.url} ${res.statusCode}`, {
+            method: req.method,
+            url: req.url,
+            statusCode: res.statusCode,
+            responseTime: `${responseTime}ms`,
+            userAgent: req.get('User-Agent'),
+            ip: req.ip,
+            userId: req.user?.id || 'anonymous'
+        });
     });
     
     next();
@@ -87,68 +110,37 @@ app.use('/api', apiRoutes);
 app.use('/', webRoutes);
 
 // Error handling middleware
-app.use(handleAuthError);
 app.use(errorHandler);
 app.use(notFoundHandler);
-
-
-// Unhandled promise rejection handling
-process.on('unhandledRejection', (reason, promise) => {
-    logger.error('Unhandled Promise Rejection', { reason, promise });
-});
-
-// Uncaught exception handling
-process.on('uncaughtException', (error) => {
-    logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
-    process.exit(1);
-});
 
 // Initialize database and start server
 async function startServer() {
     try {
-        // Initialize hybrid database
         await database.initialize();
         
-        // Start server
-        const server = app.listen(config.server.port, () => {
-            logger.info('Server started successfully', {
-                port: config.server.port,
-                environment: config.server.nodeEnv,
-                version: config.api.version
-            });
-            
-            console.log(`🚀 Server running on port ${config.server.port}`);
-            console.log(`🌍 Environment: ${config.server.nodeEnv}`);
-            console.log(`📖 API Version: ${config.api.version}`);
-            console.log(`🔗 Visit http://localhost:${config.server.port} to get started`);
-            
-            // Log system statistics
-            database.getStats().then(stats => {
-                logger.info('System initialized', stats);
-            });
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`📖 API Version: 1.0.0`);
+            console.log(`🔗 Visit http://localhost:${PORT} to get started`);
         });
-
-        // Graceful shutdown handling
-        const gracefulShutdown = async (signal) => {
-            logger.info(`${signal} received, shutting down gracefully`);
-            
-            server.close(async () => {
-                await database.shutdown();
-                process.exit(0);
-            });
-        };
-
-        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
     } catch (error) {
         logger.error('Failed to start server', { error: error.message });
         process.exit(1);
     }
 }
 
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+    logger.info('SIGINT received, shutting down gracefully');
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM received, shutting down gracefully');
+    process.exit(0);
+});
+
 // Start the server
 startServer();
-
-// Export app for testing
-module.exports = app;

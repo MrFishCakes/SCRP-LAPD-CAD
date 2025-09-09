@@ -29,7 +29,7 @@ class HybridDatabase {
                 maxRetriesPerRequest: 3
             },
             sqlite: {
-                path: process.env.SQLITE_PATH || path.join(__dirname, '../data/database.sqlite'),
+                path: process.env.SQLITE_PATH || path.join(__dirname, '../data/user-sessions.sqlite'),
                 backupPath: process.env.SQLITE_BACKUP_PATH || path.join(__dirname, '../data/backups')
             },
             cache: {
@@ -145,67 +145,14 @@ class HybridDatabase {
      * Create SQLite tables
      */
     createTables() {
-        // Users table
+        // Users table - only table we need for simplified cookie authentication
         this.sqlite.exec(`
             CREATE TABLE IF NOT EXISTS users (
-                id TEXT PRIMARY KEY,
+                discord_id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
-                discriminator TEXT,
-                avatar TEXT,
-                guild_id TEXT,
-                access_token TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                last_login DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at INTEGER DEFAULT (strftime('%s', 'now')),
+                expiry_time INTEGER
             )
-        `);
-
-        // Sessions table
-        this.sqlite.exec(`
-            CREATE TABLE IF NOT EXISTS sessions (
-                id TEXT PRIMARY KEY,
-                user_id TEXT NOT NULL,
-                data TEXT NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                last_accessed DATETIME DEFAULT CURRENT_TIMESTAMP,
-                expires_at DATETIME,
-                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-            )
-        `);
-
-        // Refresh tokens table
-        this.sqlite.exec(`
-            CREATE TABLE IF NOT EXISTS refresh_tokens (
-                user_id TEXT PRIMARY KEY,
-                hashed_token TEXT NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                last_used DATETIME DEFAULT CURRENT_TIMESTAMP,
-                expires_at DATETIME,
-                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-            )
-        `);
-
-        // API logs table
-        this.sqlite.exec(`
-            CREATE TABLE IF NOT EXISTS api_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id TEXT NOT NULL,
-                endpoint TEXT NOT NULL,
-                method TEXT NOT NULL,
-                status INTEGER NOT NULL,
-                response_time INTEGER NOT NULL,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-            )
-        `);
-
-        // Create indexes for better performance
-        this.sqlite.exec(`
-            CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions (user_id);
-            CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions (expires_at);
-            CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON refresh_tokens (expires_at);
-            CREATE INDEX IF NOT EXISTS idx_api_logs_user_id ON api_logs (user_id);
-            CREATE INDEX IF NOT EXISTS idx_api_logs_timestamp ON api_logs (timestamp);
         `);
 
         logger.info('SQLite tables created successfully');
@@ -264,84 +211,78 @@ class HybridDatabase {
     /**
      * User management
      */
-    async saveUser(userId, userData) {
-        const user = {
-            ...userData,
-            created_at: new Date().toISOString(),
-            last_login: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
+    async saveUser(discordId, userData) {
+        try {
+            const now = Math.floor(Date.now() / 1000); // Current epoch time in seconds
+            const expiryTime = now + (7 * 24 * 60 * 60); // 7 days from now in seconds
+            
+            const user = {
+                created_at: now,
+                expiry_time: expiryTime
+            };
 
-        // Save to SQLite
-        const stmt = this.sqlite.prepare(`
-            INSERT OR REPLACE INTO users 
-            (id, username, discriminator, avatar, guild_id, access_token, created_at, last_login, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        
-        stmt.run(
-            userId,
-            user.username,
-            user.discriminator,
-            user.avatar,
-            user.guildId,
-            user.accessToken,
-            user.created_at,
-            user.last_login,
-            user.updated_at
-        );
+            // Save to SQLite
+            const stmt = this.sqlite.prepare(`
+                INSERT OR REPLACE INTO users 
+                (discord_id, username, created_at, expiry_time)
+                VALUES (?, ?, ?, ?)
+            `);
+            
+            const result = stmt.run(
+                discordId,
+                userData.username,
+                user.created_at,
+                user.expiry_time
+            );
 
-        // Cache in Redis
-        await this.setCache(`user:${userId}`, user, this.config.cache.userTTL);
+            // Cache in Redis
+            await this.setCache(`user:${discordId}`, user, this.config.cache.userTTL);
 
-        logger.info('User saved', { userId });
+            logger.info('User saved successfully', { 
+                discordId, 
+                username: userData.username,
+                changes: result.changes,
+                lastInsertRowid: result.lastInsertRowid
+            });
+        } catch (error) {
+            logger.error('Failed to save user', { 
+                discordId, 
+                username: userData?.username,
+                error: error.message,
+                stack: error.stack
+            });
+            throw error;
+        }
     }
 
-    async getUser(userId) {
+    async getUser(discordId) {
         // Try cache first
-        const cached = await this.getFromCache(`user:${userId}`);
+        const cached = await this.getFromCache(`user:${discordId}`);
         if (cached) {
             return cached;
         }
 
         // Fallback to SQLite
-        const stmt = this.sqlite.prepare('SELECT * FROM users WHERE id = ?');
-        const row = stmt.get(userId);
+        const stmt = this.sqlite.prepare('SELECT * FROM users WHERE discord_id = ?');
+        const row = stmt.get(discordId);
         
-        if (row) {
-            const user = {
-                id: row.id,
-                username: row.username,
-                discriminator: row.discriminator,
-                avatar: row.avatar,
-                guildId: row.guild_id,
-                accessToken: row.access_token,
-                createdAt: row.created_at,
-                lastLogin: row.last_login
-            };
+            if (row) {
+                const user = {
+                    id: row.discord_id,
+                    username: row.username,
+                    createdAt: row.created_at, // epoch time
+                    expiryTime: row.expiry_time // epoch time
+                };
 
             // Cache for future requests
-            await this.setCache(`user:${userId}`, user, this.config.cache.userTTL);
+            await this.setCache(`user:${discordId}`, user, this.config.cache.userTTL);
             return user;
         }
 
         return null;
     }
 
-    async updateUserLastLogin(userId) {
-        const now = new Date().toISOString();
-        
-        // Update SQLite
-        const stmt = this.sqlite.prepare('UPDATE users SET last_login = ?, updated_at = ? WHERE id = ?');
-        stmt.run(now, now, userId);
-
-        // Update cache
-        const user = await this.getUser(userId);
-        if (user) {
-            user.lastLogin = now;
-            await this.setCache(`user:${userId}`, user, this.config.cache.userTTL);
-        }
-    }
+    // updateUserLastLogin method removed - not needed with simplified schema
 
     /**
      * Session management
