@@ -125,3 +125,4 @@ console.log('🔗 Discord OAuth Setup: https://discord.com/developers/applicatio
 console.log('🔗 SonoranCAD API: https://docs.sonoransoftware.com/cad/api-integration');
 
 console.log('\n✨ Setup complete!');
+

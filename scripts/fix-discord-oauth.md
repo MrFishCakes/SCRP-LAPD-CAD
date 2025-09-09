@@ -131,3 +131,4 @@ To quickly test the application without Discord server verification:
 3. **Test the OAuth flow**
 
 This will allow any Discord user to authenticate without checking server membership.
+
