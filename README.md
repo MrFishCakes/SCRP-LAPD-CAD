@@ -9,29 +9,9 @@ A web application that integrates with SonoranCAD API and uses Discord OAuth for
 - 🚔 **SonoranCAD API Integration** - Full integration with SonoranCAD API endpoints
 - 📱 **Modern Web Interface** - Responsive, user-friendly interface
 - 🔄 **Real-time Updates** - Live data from SonoranCAD system
-- 🍪 **Cookie-Based Authentication** - Simple, secure authentication with Discord ID cookies
-- 💾 **Persistent Sessions** - Users stay logged in across browser sessions with 7-day cookies
+- 🔑 **JWT Token Authentication** - Secure, persistent authentication with refresh tokens
+- 💾 **Persistent Sessions** - Users stay logged in across browser sessions
 - 🔒 **Enhanced Security** - Rate limiting, input validation, and secure token storage
-
-## 🔐 Authentication System
-
-The application uses a simple and secure cookie-based authentication system:
-
-### How It Works
-1. **User logs in** via Discord OAuth
-2. **Cookie is set** containing Discord ID and expiration (7 days)
-3. **Subsequent visits** check cookie validity
-4. **If cookie valid** → User stays logged in
-5. **If cookie expired/invalid** → Redirect to login
-6. **If 12 hours or less remaining** → Prompt for re-authentication
-
-### Security Features
-- **HMAC-SHA256 signatures** prevent tampering
-- **HTTP-only cookies** prevent XSS attacks
-- **Secure flag** in production
-- **SameSite protection** against CSRF
-- **Automatic expiration** after 7 days
-- **12-hour warning** for security
 
 ## Prerequisites
 

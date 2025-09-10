@@ -65,3 +65,4 @@ console.log(`Cookie Name: ${simpleCookieAuth.cookieName}`);
 console.log(`Max Age: ${simpleCookieAuth.maxAge}ms (${simpleCookieAuth.maxAge / (1000 * 60 * 60 * 24)} days)`);
 console.log(`Warning Threshold: ${simpleCookieAuth.warningThreshold}ms (${simpleCookieAuth.warningThreshold / (1000 * 60 * 60)} hours)`);
 
+

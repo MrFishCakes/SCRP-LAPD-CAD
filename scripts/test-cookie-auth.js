@@ -91,3 +91,4 @@ console.log(`Max Age: ${cookieValidator.maxAge}ms (${cookieValidator.maxAge / (1
 console.log(`Warning Threshold: ${cookieValidator.warningThreshold}ms (${cookieValidator.warningThreshold / (1000 * 60 * 60)} hours)`);
 console.log(`Secret: ${cookieValidator.secret ? 'Set' : 'Not set'}`);
 
+

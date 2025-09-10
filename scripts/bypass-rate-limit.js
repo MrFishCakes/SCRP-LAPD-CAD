@@ -44,3 +44,4 @@ console.log('3. Set the correct values');
 console.log('4. Restart the application');
 console.log('\n🚀 You can now test the authentication without rate limiting issues!');
 
+

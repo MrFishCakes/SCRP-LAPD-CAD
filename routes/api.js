@@ -66,13 +66,7 @@ router.get('/test', asyncHandler(async (req, res) => {
 router.get('/active-units', asyncHandler(async (req, res) => {
     try {
         const lapdOnly = req.query.lapdOnly === 'true';
-        const serverId = req.query.serverId || 1;
-        const onlyUnits = req.query.onlyUnits === 'true';
-        const includeOffline = req.query.includeOffline === 'true';
-        const limit = req.query.limit || 100;
-        const offset = req.query.offset || 0;
-
-        const units = await sonoranAPI.getActiveUnits(lapdOnly, serverId, onlyUnits, includeOffline, limit, offset);
+        const units = await sonoranAPI.getActiveUnits(lapdOnly);
         res.json({
             data: units
         });
