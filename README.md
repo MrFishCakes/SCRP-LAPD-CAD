@@ -1,4 +1,4 @@
-# SonoranCAD Web Application
+# SCRP-LAPD-CAD
 
 A web application that integrates with SonoranCAD API and uses Discord OAuth for authentication with server and role verification.
 
@@ -7,261 +7,227 @@ A web application that integrates with SonoranCAD API and uses Discord OAuth for
 - 🔐 **Discord OAuth Authentication** - Secure login with Discord account
 - 🛡️ **Server & Role Verification** - Ensures users are members of specific Discord server with required roles
 - 🚔 **SonoranCAD API Integration** - Full integration with SonoranCAD API endpoints
-- 📱 **Modern Web Interface** - Responsive, user-friendly interface
-- 🔄 **Real-time Updates** - Live data from SonoranCAD system
-- 🔑 **JWT Token Authentication** - Secure, persistent authentication with refresh tokens
-- 💾 **Persistent Sessions** - Users stay logged in across browser sessions
-- 🔒 **Enhanced Security** - Rate limiting, input validation, and secure token storage
+- 📱 **LAPD-Style Interface** - Professional law enforcement themed UI
+- 🔄 **Real-time CAD Data** - Live data from SonoranCAD system
+- 🍪 **Cookie-Based Sessions** - Simple 7-day authentication with 12-hour warning
+- 💾 **Persistent User Storage** - SQLite database with Redis caching
+- 🔒 **Enhanced Security** - Rate limiting and secure cookie handling
 
 ## Prerequisites
 
-Before setting up the application, you'll need:
+- **Node.js** - Version 16 or higher
+- **Discord Application** - For OAuth authentication
+- **SonoranCAD Account** - With API access
+- **Redis** (optional) - For caching (falls back to SQLite only)
 
-1. **Discord Application** - Create a Discord application for OAuth
-2. **SonoranCAD Account** - Active SonoranCAD subscription with API access
-3. **Node.js** - Version 16 or higher
-4. **Discord Bot Token** (optional) - For role verification
+## Quick Setup
 
-## Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd sonoran-cad-web-app
-   ```
-
-2. **Run the setup script**
-   ```bash
-   npm run setup
-   ```
-   This will:
-   - Create your `.env` file from the template
-   - Generate a secure session secret
-   - Create necessary directories
-   - Validate your configuration
-
-3. **Install dependencies**
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-4. **Configure your `.env` file** (see Configuration section below)
-
-5. **Start the application**
+2. **Run setup script**
    ```bash
-   npm start
+   npm run setup
    ```
 
-   For development with auto-restart:
+3. **Configure environment** (see Configuration section)
+
+4. **Start the application**
    ```bash
    npm run dev
    ```
 
+5. **Visit** `http://localhost:3000`
+
 ## Configuration
 
-### Discord OAuth Setup
+### 1. Discord OAuth Setup
 
 1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
 2. Create a new application
-3. Go to OAuth2 section
+3. Go to OAuth2 → General
 4. Add redirect URI: `http://localhost:3000/auth/discord/callback`
-5. Copy Client ID and Client Secret to your `.env` file
+5. Copy Client ID and Client Secret
 
-### Discord Server Configuration
+### 2. Discord Server Setup
 
-1. Get your Discord server (guild) ID:
-   - Enable Developer Mode in Discord
-   - Right-click your server → Copy Server ID
-2. Get the required role ID:
-   - Right-click the role → Copy Role ID
-3. Add these to your `.env` file
+1. Enable Developer Mode in Discord
+2. Right-click your server → Copy Server ID
+3. Right-click required role → Copy Role ID
 
-### SonoranCAD API Setup
+### 3. SonoranCAD API Setup
 
-1. Log into your SonoranCAD account
+1. Log into SonoranCAD
 2. Go to Settings → API Integration
-3. Generate API credentials:
-   - API ID
-   - API Key
-   - Community ID
-4. Add these to your `.env` file
+3. Generate API credentials (API ID, API Key, Community ID)
 
-### Environment Variables
+### 4. Environment Variables
 
-Create a `.env` file with the following variables:
+Create `.env` file:
 
 ```env
-# Discord OAuth Configuration
+# Discord OAuth
 DISCORD_CLIENT_ID=your_discord_client_id
 DISCORD_CLIENT_SECRET=your_discord_client_secret
 DISCORD_REDIRECT_URI=http://localhost:3000/auth/discord/callback
 
-# Discord Server Configuration
+# Discord Server (optional - comment out to bypass)
 DISCORD_GUILD_ID=your_discord_server_id
 DISCORD_REQUIRED_ROLE_ID=your_required_role_id
 
-# SonoranCAD API Configuration
+# SonoranCAD API
 SONORAN_API_ID=your_sonoran_api_id
 SONORAN_API_KEY=your_sonoran_api_key
 SONORAN_COMMUNITY_ID=your_sonoran_community_id
 
-# Session Configuration
+# Server
 SESSION_SECRET=your_session_secret_key
-
-# Server Configuration
 PORT=3000
 NODE_ENV=development
+
+# Redis (optional)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
 ```
-
-## API Endpoints
-
-The application provides the following API endpoints (all require authentication):
-
-### Authentication
-- `GET /auth/discord` - Initiate Discord OAuth
-- `GET /auth/discord/callback` - Discord OAuth callback
-- `POST /auth/logout` - Logout user
-- `GET /auth/me` - Get current user info
-- `GET /auth/status` - Check authentication status
-- `POST /auth/refresh-token` - Refresh access token
-- `POST /auth/refresh` - Refresh user data from Discord
-
-### SonoranCAD Integration
-- `GET /api/test` - Test API connection
-- `GET /api/active-units` - Get active units
-- `GET /api/calls` - Get all calls/dispatches
-- `POST /api/new-dispatch` - Create new dispatch
-- `POST /api/new-911` - Create new 911 call
-- `POST /api/attach-unit` - Attach unit to call
-- `POST /api/detach-unit` - Detach unit from call
-- `POST /api/close-dispatch` - Close dispatch call
-- `POST /api/add-call-note` - Add note to call
-- `POST /api/update-unit-status` - Update unit status
-- `POST /api/set-unit-panic` - Set unit panic status
-- `POST /api/lookup` - Lookup name or plate
 
 ## Usage
 
-1. **Start the application** and navigate to `http://localhost:3000`
-2. **Login with Discord** - You'll be redirected to Discord for authentication
-3. **Access the dashboard** - Once authenticated, you'll see the main interface
-4. **Use SonoranCAD features**:
-   - View active calls and units
-   - Create new dispatches and 911 calls
-   - Manage unit statuses
-   - Perform lookups
-   - Add call notes
+### Authentication Flow
+1. Visit `http://localhost:3000`
+2. Click "Login with Discord"
+3. Authorize the application
+4. Get redirected to `/hello` (success) or `/no-hello` (failure)
 
-## Security Features
+### Cookie System
+- **7-day expiry** - Users stay logged in for 7 days
+- **12-hour warning** - Re-authentication required when < 12 hours remain
+- **Automatic redirect** - Invalid pages redirect to `/hello`
 
-- **Discord OAuth** - Secure authentication through Discord
-- **Server Membership Verification** - Ensures users are in the correct Discord server
-- **Role-based Access** - Verifies users have the required Discord role
-- **JWT Token Authentication** - Secure, stateless authentication with access and refresh tokens
-- **Persistent Sessions** - Users stay logged in across browser sessions and page refreshes
-- **Token Refresh** - Automatic token renewal to maintain long-term sessions
-- **Rate Limiting** - Prevents abuse with configurable request limits
-- **Input Validation** - Comprehensive validation of all user inputs
-- **Session Management** - Secure session handling with configurable timeouts
-- **CORS Protection** - Configurable CORS settings for production
-- **Helmet Security** - Security headers and protection
-- **Secure Token Storage** - Tokens stored securely with proper expiration handling
+### SonoranCAD API Testing
+Visit `/hello` page to test API endpoints:
+- **Test Connection** - Verify API connectivity
+- **Active Units** - Get all active units
+- **Get Calls** - Get all calls with ID and description
+- **All Calls** - Get complete call data
+- **Active Calls** - Get only active calls
+- **Dispatches** - Get dispatch information
+- **Call History** - Get historical call data
+- **Accounts** - Get account information
+- **Map Blips** - Get map data
 
-## Development
+## Available Scripts
 
-### Project Structure
+```bash
+# Development
+npm run dev          # Start with auto-restart
+npm start           # Start production server
 
+# Setup & Maintenance
+npm run setup       # Initial setup wizard
+
+# Authentication
+npm run diagnose    # Check Discord OAuth configuration
+npm run bypass-rate-limit  # Temporarily disable Discord verification
+npm run test-simple-cookie # Test cookie authentication
+
+# Database
+npm run view-users  # View user database
+npm run rebuild-db  # Recreate database
+npm run fix-db      # Fix database schema issues
+npm run test-db     # Test database functionality
 ```
-sonoran-cad-web-app/
-├── config/
-│   ├── config.js           # Application configuration management
-│   └── database.js         # Database/in-memory storage management
-├── middleware/
-│   ├── auth.js             # Authentication middleware
-│   └── error.js            # Error handling middleware
-├── routes/
-│   ├── auth.js             # Authentication routes
-│   ├── api.js              # SonoranCAD API routes
-│   └── web.js              # Web interface routes
-├── utils/
-│   ├── logger.js           # Logging utility
-│   ├── validators.js       # Input validation utilities
-│   └── helpers.js          # General helper functions
-├── lib/
-│   └── sonoran-api.js      # SonoranCAD API integration
-├── public/
-│   └── index.html          # Web interface
-├── scripts/
-│   └── setup.js            # Setup and configuration script
-├── server.js               # Main server file
-├── package.json            # Dependencies and scripts
-├── env.example             # Environment variables template
-└── README.md               # This file
-```
-
-### Adding New Features
-
-1. **API Endpoints**: Add new routes in `routes/api.js`
-2. **Authentication**: Modify `routes/auth.js` for auth changes
-3. **SonoranCAD Integration**: Extend the `SonoranAPI` class in `lib/sonoran-api.js`
-4. **Frontend**: Modify `public/index.html` for UI changes
-5. **Middleware**: Add new middleware in `middleware/` directory
-6. **Utilities**: Add helper functions in `utils/` directory
-7. **Configuration**: Update `config/config.js` for new settings
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Discord OAuth not working**
+1. **Discord OAuth Error**
+   ```bash
+   npm run diagnose
+   ```
    - Check redirect URI matches exactly
-   - Verify client ID and secret are correct
-   - Ensure Discord application is properly configured
+   - Verify client ID and secret
+   - Ensure Discord app has proper scopes
 
-2. **Role verification failing**
-   - Verify guild ID and role ID are correct
-   - Check if bot has permission to read member roles
-   - Ensure user has the required role
+2. **Rate Limited by Discord**
+   ```bash
+   npm run bypass-rate-limit
+   ```
+   - Temporarily disables server/role verification
+   - Allows testing without Discord restrictions
 
-3. **SonoranCAD API errors**
-   - Verify API credentials are correct
-   - Check if API ID has proper permissions
-   - Ensure community ID matches your SonoranCAD community
+3. **Database Issues**
+   ```bash
+   npm run view-users    # Check user data
+   npm run rebuild-db    # Recreate database
+   npm run fix-db        # Fix schema issues
+   ```
 
-4. **Session issues**
-   - Check SESSION_SECRET is set
-   - Verify cookie settings for production
-   - Clear browser cookies if needed
+4. **SonoranCAD API Errors**
+   - Verify API credentials in `.env`
+   - Check community ID matches your SonoranCAD setup
+   - Ensure API has proper permissions
 
-### Debug Mode
+## Project Structure
 
-Set `NODE_ENV=development` in your `.env` file for detailed error messages and logging.
+```
+SCRP-LAPD-CAD/
+├── config/
+│   ├── config.js           # Application configuration
+│   └── hybrid-database.js  # SQLite + Redis database
+├── middleware/
+│   ├── simple-auth.js      # Cookie authentication
+│   └── error.js            # Error handling
+├── routes/
+│   ├── auth.js             # Discord OAuth routes
+│   ├── api.js              # SonoranCAD API routes
+│   └── web.js              # Web interface routes
+├── lib/
+│   └── sonoran-api/        # SonoranCAD API integration
+│       ├── client.js        # HTTP client
+│       ├── endpoints.js     # API endpoints
+│       ├── request.js       # Request handler
+│       └── sonoran-api.js   # Main API class
+├── public/
+│   ├── index.html          # Login page
+│   ├── hello.html          # Success page
+│   └── no-hello.html       # Failure page
+├── scripts/
+│   ├── setup.js            # Setup wizard
+│   ├── auth/               # Authentication scripts
+│   │   ├── diagnose-discord.js
+│   │   ├── bypass-rate-limit.js
+│   │   └── test-simple-cookie.js
+│   ├── database/           # Database scripts
+│   │   ├── view-users.js
+│   │   ├── rebuild-database.js
+│   │   ├── fix-database-schema.js
+│   │   └── test-hybrid-db.js
+│   └── docs/               # Documentation
+│       ├── fix-discord-oauth.md
+│       └── setup-redis.md
+├── server.js               # Main server
+├── package.json            # Dependencies
+└── env.example             # Environment template
+```
 
-## Production Deployment
+## Database Schema
 
-1. **Set production environment variables**
-2. **Update CORS origin** to your production domain
-3. **Use HTTPS** for secure cookie transmission
-4. **Set secure session secret**
-5. **Configure reverse proxy** (nginx/Apache) if needed
+**Users Table:**
+- `discord_id` (TEXT PRIMARY KEY) - Discord user ID
+- `username` (TEXT) - Discord username
+- `created_at` (INTEGER) - Epoch timestamp
+- `expiry_time` (INTEGER) - Epoch timestamp (7 days from creation)
 
-## Contributing
+## Security Features
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support with this application:
-- Check the troubleshooting section above
-- Review SonoranCAD API documentation
-- Check Discord OAuth documentation
-
-For SonoranCAD-specific issues, contact SonoranCAD support.
+- **Cookie-based Authentication** - Simple 7-day sessions
+- **Discord OAuth** - Secure login through Discord
+- **Server/Role Verification** - Optional Discord server membership
+- **Rate Limiting** - Prevents API abuse
+- **Input Validation** - Secure data handling
+- **CORS Protection** - Configurable cross-origin settings

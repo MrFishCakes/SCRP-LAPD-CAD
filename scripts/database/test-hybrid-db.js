@@ -50,22 +50,8 @@ async function testHybridDatabase() {
         const retrievedSession = await database.getSession(testSession.id);
         console.log('✅ Session retrieved:', retrievedSession ? 'SUCCESS' : 'FAILED');
 
-        // Test refresh token operations
-        console.log('\n4. Testing refresh token operations...');
-        const testToken = {
-            userId: testUser.id,
-            hashedToken: 'hashed-test-token',
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        };
-
-        await database.saveRefreshToken(testUser.id, testToken);
-        console.log('✅ Refresh token saved');
-
-        const retrievedToken = await database.getRefreshToken(testUser.id);
-        console.log('✅ Refresh token retrieved:', retrievedToken ? 'SUCCESS' : 'FAILED');
-
-        await database.updateRefreshTokenLastUsed(testUser.id);
-        console.log('✅ Refresh token last used updated');
+        // JWT refresh token operations removed - using cookie-based authentication
+        console.log('\n4. Skipping JWT refresh token operations (deprecated)...');
 
         // Test API logging
         console.log('\n5. Testing API logging...');
@@ -90,7 +76,7 @@ async function testHybridDatabase() {
         // Cleanup test data
         console.log('\n8. Cleaning up test data...');
         await database.deleteSession(testSession.id);
-        await database.deleteRefreshToken(testUser.id);
+        // JWT refresh token cleanup removed - using cookie-based authentication
         console.log('✅ Test data cleaned up');
 
         // Test backup functionality

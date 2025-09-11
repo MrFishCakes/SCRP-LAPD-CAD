@@ -131,17 +131,11 @@ function errorHandler(err, req, res, next) {
             statusCode: 400,
             type: 'DuplicateError'
         };
-    } else if (err.name === 'JsonWebTokenError') {
+    } else if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
         error = {
-            message: 'Invalid token',
+            message: 'Authentication error - JWT tokens are deprecated, use cookie-based authentication',
             statusCode: 401,
-            type: 'TokenError'
-        };
-    } else if (err.name === 'TokenExpiredError') {
-        error = {
-            message: 'Token expired',
-            statusCode: 401,
-            type: 'TokenExpiredError'
+            type: 'DeprecatedTokenError'
         };
     }
 

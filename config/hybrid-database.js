@@ -357,106 +357,9 @@ class HybridDatabase {
     }
 
     /**
-     * Refresh token management
+     * Refresh token management - DEPRECATED
+     * These methods are no longer used with cookie-based authentication
      */
-    async saveRefreshToken(userId, tokenData) {
-        const token = {
-            ...tokenData,
-            created_at: new Date().toISOString(),
-            last_used: new Date().toISOString()
-        };
-
-        // Save to SQLite
-        const stmt = this.sqlite.prepare(`
-            INSERT OR REPLACE INTO refresh_tokens 
-            (user_id, hashed_token, created_at, last_used, expires_at)
-            VALUES (?, ?, ?, ?, ?)
-        `);
-        
-        stmt.run(
-            userId,
-            token.hashedToken,
-            token.created_at,
-            token.last_used,
-            token.expiresAt
-        );
-
-        // Cache in Redis
-        await this.setCache(`refresh_token:${userId}`, token, this.config.cache.refreshTokenTTL);
-
-        logger.info('Refresh token saved', { userId });
-    }
-
-    async getRefreshToken(userId) {
-        // Try cache first
-        const cached = await this.getFromCache(`refresh_token:${userId}`);
-        if (cached) {
-            return cached;
-        }
-
-        // Fallback to SQLite
-        const stmt = this.sqlite.prepare('SELECT * FROM refresh_tokens WHERE user_id = ?');
-        const row = stmt.get(userId);
-        
-        if (row) {
-            const token = {
-                userId: row.user_id,
-                hashedToken: row.hashed_token,
-                createdAt: row.created_at,
-                lastUsed: row.last_used,
-                expiresAt: row.expires_at
-            };
-
-            // Cache for future requests
-            await this.setCache(`refresh_token:${userId}`, token, this.config.cache.refreshTokenTTL);
-            return token;
-        }
-
-        return null;
-    }
-
-    async deleteRefreshToken(userId) {
-        // Delete from SQLite
-        const stmt = this.sqlite.prepare('DELETE FROM refresh_tokens WHERE user_id = ?');
-        stmt.run(userId);
-
-        // Delete from cache
-        await this.deleteFromCache(`refresh_token:${userId}`);
-
-        logger.info('Refresh token deleted', { userId });
-    }
-
-    async updateRefreshTokenLastUsed(userId) {
-        const now = new Date().toISOString();
-        
-        // Update SQLite
-        const stmt = this.sqlite.prepare('UPDATE refresh_tokens SET last_used = ? WHERE user_id = ?');
-        stmt.run(now, userId);
-
-        // Update cache
-        const token = await this.getRefreshToken(userId);
-        if (token) {
-            token.lastUsed = now;
-            await this.setCache(`refresh_token:${userId}`, token, this.config.cache.refreshTokenTTL);
-        }
-    }
-
-    async getExpiredRefreshTokens() {
-        const now = new Date().toISOString();
-        const stmt = this.sqlite.prepare('SELECT * FROM refresh_tokens WHERE expires_at < ?');
-        const rows = stmt.all(now);
-        
-        return rows.map(row => ({
-            userId: row.user_id,
-            token: {
-                userId: row.user_id,
-                hashedToken: row.hashed_token,
-                createdAt: row.created_at,
-                lastUsed: row.last_used,
-                expiresAt: row.expires_at
-            }
-        }));
-    }
 
     /**
      * API logging
@@ -548,15 +451,8 @@ class HybridDatabase {
     }
 
     async cleanupExpiredTokens() {
-        const expiredTokens = await this.getExpiredRefreshTokens();
-        
-        for (const { userId } of expiredTokens) {
-            await this.deleteRefreshToken(userId);
-        }
-        
-        if (expiredTokens.length > 0) {
-            logger.info('Expired refresh tokens cleaned up', { count: expiredTokens.length });
-        }
+        // JWT token cleanup no longer needed with cookie-based authentication
+        logger.info('Token cleanup skipped - using cookie-based authentication');
     }
 
     /**
@@ -565,13 +461,11 @@ class HybridDatabase {
     async getStats() {
         const userCount = this.sqlite.prepare('SELECT COUNT(*) as count FROM users').get().count;
         const sessionCount = this.sqlite.prepare('SELECT COUNT(*) as count FROM sessions').get().count;
-        const tokenCount = this.sqlite.prepare('SELECT COUNT(*) as count FROM refresh_tokens').get().count;
         const apiLogCount = this.sqlite.prepare('SELECT COUNT(*) as count FROM api_logs').get().count;
 
         return {
             totalUsers: userCount,
             activeSessions: sessionCount,
-            activeRefreshTokens: tokenCount,
             totalApiCalls: apiLogCount,
             redisConnected: this.redisConnected,
             sqliteConnected: this.sqliteConnected

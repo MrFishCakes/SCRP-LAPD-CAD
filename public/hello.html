@@ -259,6 +259,28 @@
                     window.location.href = '/';
                 });
         }
+
+        async function testAPI(endpoint) {
+    const responseBox = document.getElementById("api-response");
+    responseBox.style.display = "block";
+    responseBox.textContent = "⏳ Loading...";
+
+    try {
+        const res = await fetch(`/api/${endpoint}`);
+        if (!res.ok) throw new Error("Request failed: " + res.status);
+
+        const data = await res.json();
+        responseBox.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+        responseBox.textContent = "❌ " + err.message;
+    }
+}
+
+function clearResponse() {
+    const responseBox = document.getElementById("api-response");
+    responseBox.style.display = "none";
+    responseBox.textContent = "";
+}
     </script>
 </body>
 </html>
