@@ -145,13 +145,50 @@ class HybridDatabase {
      * Create SQLite tables
      */
     createTables() {
-        // Users table - only table we need for simplified cookie authentication
+        // Users table - stores Discord user information
         this.sqlite.exec(`
             CREATE TABLE IF NOT EXISTS users (
                 discord_id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
                 created_at INTEGER DEFAULT (strftime('%s', 'now')),
-                expiry_time INTEGER
+                expiry_time INTEGER,
+                admin_access INTEGER DEFAULT 0
+            )
+        `);
+
+        // Sessions table - stores session data
+        this.sqlite.exec(`
+            CREATE TABLE IF NOT EXISTS sessions (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                data TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                last_accessed TEXT DEFAULT CURRENT_TIMESTAMP,
+                expires_at TEXT NOT NULL
+            )
+        `);
+
+        // Migration: Add admin_access column if it doesn't exist
+        try {
+            this.sqlite.exec(`ALTER TABLE users ADD COLUMN admin_access INTEGER DEFAULT 0`);
+            logger.info('Added admin_access column to users table');
+        } catch (error) {
+            // Column already exists, ignore error
+            if (!error.message.includes('duplicate column name')) {
+                logger.warn('Migration error (expected if column exists):', error.message);
+            }
+        }
+
+        // API logs table - stores API call logs
+        this.sqlite.exec(`
+            CREATE TABLE IF NOT EXISTS api_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                endpoint TEXT NOT NULL,
+                method TEXT NOT NULL,
+                status INTEGER NOT NULL,
+                response_time INTEGER NOT NULL,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
@@ -224,19 +261,27 @@ class HybridDatabase {
             // Save to SQLite
             const stmt = this.sqlite.prepare(`
                 INSERT OR REPLACE INTO users 
-                (discord_id, username, created_at, expiry_time)
-                VALUES (?, ?, ?, ?)
+                (discord_id, username, created_at, expiry_time, admin_access)
+                VALUES (?, ?, ?, ?, ?)
             `);
             
             const result = stmt.run(
                 discordId,
                 userData.username,
                 user.created_at,
-                user.expiry_time
+                user.expiry_time,
+                userData.adminAccess ? 1 : 0
             );
 
-            // Cache in Redis
-            await this.setCache(`user:${discordId}`, user, this.config.cache.userTTL);
+            // Cache in Redis - cache the full user data
+            const userDataToCache = {
+                id: discordId,
+                username: userData.username,
+                createdAt: user.created_at,
+                expiryTime: user.expiry_time,
+                adminAccess: userData.adminAccess || false
+            };
+            await this.setCache(`user:${discordId}`, userDataToCache, this.config.cache.userTTL);
 
             logger.info('User saved successfully', { 
                 discordId, 
@@ -271,7 +316,8 @@ class HybridDatabase {
                     id: row.discord_id,
                     username: row.username,
                     createdAt: row.created_at, // epoch time
-                    expiryTime: row.expiry_time // epoch time
+                    expiryTime: row.expiry_time, // epoch time
+                    adminAccess: Boolean(row.admin_access)
                 };
 
             // Cache for future requests
@@ -280,6 +326,59 @@ class HybridDatabase {
         }
 
         return null;
+    }
+
+    async checkAdminAccess(discordId) {
+        try {
+            // Try cache first
+            const cached = await this.getFromCache(`admin:${discordId}`);
+            if (cached !== null) {
+                return Boolean(cached);
+            }
+
+            // Fallback to SQLite
+            const stmt = this.sqlite.prepare('SELECT admin_access FROM users WHERE discord_id = ?');
+            const row = stmt.get(discordId);
+            
+            if (row) {
+                const adminAccess = Boolean(row.admin_access);
+                // Cache the admin access status
+                await this.setCache(`admin:${discordId}`, adminAccess, this.config.cache.userTTL);
+                return adminAccess;
+            }
+
+            return false;
+        } catch (error) {
+            logger.error('Failed to check admin access:', error);
+            return false;
+        }
+    }
+
+    async deleteUser(discordId) {
+        try {
+            // Delete from SQLite
+            const stmt = this.sqlite.prepare('DELETE FROM users WHERE discord_id = ?');
+            const result = stmt.run(discordId);
+            
+            // Delete from cache
+            await this.deleteFromCache(`user:${discordId}`);
+            
+            logger.info('User deleted successfully', { discordId, changes: result.changes });
+            return result.changes > 0;
+        } catch (error) {
+            logger.error('Failed to delete user:', error);
+            throw error;
+        }
+    }
+
+    async clearUserCache(discordId) {
+        try {
+            await this.deleteFromCache(`user:${discordId}`);
+            logger.info('User cache cleared', { discordId });
+        } catch (error) {
+            logger.error('Failed to clear user cache:', error);
+            throw error;
+        }
     }
 
     // updateUserLastLogin method removed - not needed with simplified schema

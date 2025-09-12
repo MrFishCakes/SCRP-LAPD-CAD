@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .nav-link.active {
+            color: #fff !important;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        .user-status-active {
+            color: #28a745;
+        }
+        .user-status-expired {
+            color: #dc3545;
+        }
+        .table-responsive {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/admin">
+                    <i class="bi bi-shield-check"></i> Admin Panel
+                </a>
+                
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link" href="/admin">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link active" href="/admin/users">
+                        <i class="bi bi-people"></i> User Management
+                    </a>
+                    <a class="nav-link" href="/admin/api/logs">
+                        <i class="bi bi-journal-text"></i> API Logs
+                    </a>
+                </div>
+                
+                <div class="navbar-nav">
+                    <span class="navbar-text me-3">
+                        <i class="bi bi-person-circle"></i> <%= user.username %>
+                    </span>
+                    <a href="/auth/logout" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="container-fluid">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><%= title %></h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash messages -->
+                <div id="flash-messages"></div>
+
+                <!-- Page content -->
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">User Management</h6>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter Form -->
+                <form method="GET" action="/admin/users" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Search Users</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="<%= filters.search %>" placeholder="Username or Discord ID">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status Filter</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Users</option>
+                            <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active Only</option>
+                            <option value="expired" <%= filters.status === 'expired' ? 'selected' : '' %>>Expired Only</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="limit" class="form-label">Per Page</label>
+                        <select class="form-select" id="limit" name="limit">
+                            <option value="10" <%= pagination.limit === 10 ? 'selected' : '' %>>10</option>
+                            <option value="20" <%= pagination.limit === 20 ? 'selected' : '' %>>20</option>
+                            <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50</option>
+                            <option value="100" <%= pagination.limit === 100 ? 'selected' : '' %>>100</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                        <a href="/admin/users" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    Users (<%= pagination.totalUsers %> total)
+                </h6>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="bulkDelete()">
+                        <i class="bi bi-trash"></i> Bulk Delete
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">
+                        <i class="bi bi-check-square"></i> Select All
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <% if (users.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="50">
+                                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleAllCheckboxes()">
+                                    </th>
+                                    <th>Username</th>
+                                    <th>Discord ID</th>
+                                    <th>Created</th>
+                                    <th>Expires</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% users.forEach(user => { %>
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="user-checkbox" value="<%= user.discord_id %>">
+                                        </td>
+                                        <td><%= user.username %></td>
+                                        <td><code><%= user.discord_id %></code></td>
+                                        <td>
+                                            <%= user.createdDate.toLocaleDateString() %>
+                                            <br>
+                                            <small class="text-muted"><%= user.createdDate.toLocaleTimeString() %></small>
+                                        </td>
+                                        <td>
+                                            <%= user.expiryDate.toLocaleDateString() %>
+                                            <br>
+                                            <small class="text-muted"><%= user.expiryDate.toLocaleTimeString() %></small>
+                                        </td>
+                                        <td>
+                                            <% if (user.isExpired) { %>
+                                                <span class="badge bg-danger">Expired</span>
+                                            <% } else { %>
+                                                <span class="badge bg-success">Active</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="/admin/users/<%= user.discord_id %>" class="btn btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <form method="POST" action="/admin/users/<%= user.discord_id %>/refresh-cache" style="display: inline;">
+                                                    <button type="submit" class="btn btn-outline-info">
+                                                        <i class="bi bi-arrow-clockwise"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="/admin/users/<%= user.discord_id %>/delete" style="display: inline;">
+                                                    <button type="submit" class="btn btn-outline-danger">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <% if (pagination.totalPages > 1) { %>
+                        <nav aria-label="User pagination">
+                            <ul class="pagination justify-content-center">
+                                <% if (pagination.hasPrev) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&search=<%= filters.search %>&status=<%= filters.status %>&limit=<%= pagination.limit %>">Previous</a>
+                                    </li>
+                                <% } %>
+                                
+                                <% for (let i = Math.max(1, pagination.currentPage - 2); i <= Math.min(pagination.totalPages, pagination.currentPage + 2); i++) { %>
+                                    <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>&search=<%= filters.search %>&status=<%= filters.status %>&limit=<%= pagination.limit %>"><%= i %></a>
+                                    </li>
+                                <% } %>
+                                
+                                <% if (pagination.hasNext) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>&search=<%= filters.search %>&status=<%= filters.status %>&limit=<%= pagination.limit %>">Next</a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </nav>
+                    <% } %>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="bi bi-people fa-3x text-muted"></i>
+                        <h5 class="text-muted mt-3">No users found</h5>
+                        <p class="text-muted">Try adjusting your search criteria or filters.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bulk Delete Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Bulk Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="bulkDeleteCount"></strong> selected users?</p>
+                <p class="text-danger"><small>This action cannot be undone and will remove all selected users from both database and cache.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDelete">Delete Users</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function bulkDelete() {
+        const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked'));
+        if (selectedUsers.length === 0) {
+            showFlashMessage('Please select at least one user to delete', 'warning');
+            return;
+        }
+        
+        document.getElementById('bulkDeleteCount').textContent = selectedUsers.length;
+        new bootstrap.Modal(document.getElementById('bulkDeleteModal')).show();
+    }
+
+    function selectAll() {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        document.getElementById('selectAllCheckbox').checked = !allChecked;
+    }
+
+    function toggleAllCheckboxes() {
+        const masterCheckbox = document.getElementById('selectAllCheckbox');
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+    }
+
+    document.getElementById('confirmBulkDelete').addEventListener('click', function() {
+        const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked'));
+        const discordIds = selectedUsers.map(cb => cb.value);
+        
+        fetch('/admin/users/bulk-delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ discordIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showFlashMessage(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showFlashMessage(data.error || 'Failed to delete users', 'danger');
+            }
+        })
+        .catch(error => {
+            showFlashMessage('Error deleting users', 'danger');
+        });
+        
+        bootstrap.Modal.getInstance(document.getElementById('bulkDeleteModal')).hide();
+    });
+</script>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Flash message handling
+        function showFlashMessage(message, type = 'info') {
+            const flashContainer = document.getElementById('flash-messages');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            flashContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Handle URL parameters for flash messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        const messageType = urlParams.get('type') || 'info';
+        
+        if (message) {
+            showFlashMessage(decodeURIComponent(message), messageType);
+            // Clean up URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    </script>
+</body>
+</html>

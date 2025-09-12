@@ -1,0 +1,25 @@
+<% layout('admin/layout') -%>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-exclamation-triangle fa-4x text-warning mb-4"></i>
+                <h2 class="text-danger mb-3"><%= error %></h2>
+                <p class="text-muted mb-4"><%= message %></p>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="/admin" class="btn btn-primary">
+                        <i class="bi bi-house"></i> Back to Dashboard
+                    </a>
+                    <a href="/admin/users" class="btn btn-outline-secondary">
+                        <i class="bi bi-people"></i> User Management
+                    </a>
+                    <button type="button" class="btn btn-outline-info" onclick="history.back()">
+                        <i class="bi bi-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

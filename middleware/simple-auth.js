@@ -56,7 +56,12 @@ async function checkCookieAuth(req, res, next) {
         // Valid authentication
         req.authStatus = 'valid';
         req.user = user;
-        logger.debug('Valid authentication found', { discordId, username: user.username });
+        logger.debug('Valid authentication found', { 
+            discordId, 
+            username: user.username,
+            userObject: user,
+            userKeys: Object.keys(user)
+        });
         return next();
 
     } catch (error) {

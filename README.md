@@ -68,30 +68,46 @@ A web application that integrates with SonoranCAD API and uses Discord OAuth for
 Create `.env` file:
 
 ```env
-# Discord OAuth
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
-DISCORD_REDIRECT_URI=http://localhost:3000/auth/discord/callback
+# Discord Configuration
+DISCORD_CLIENT_ID=your_discord_client_id # Client ID generated for OAuth
+DISCORD_CLIENT_SECRET=your_discord_client_secret # Client secret generated for OAuth
+DISCORD_REDIRECT_URI=http://localhost:3000/auth/discord/callback # URI to redirect to after OAuth
+DISCORD_GUILD_ID=your_discord_server_id # Guild (Server) ID that is required to be authenticated
+DISCORD_REQUIRED_ROLE_ID=your_required_role_id # Role required in guild to be authenticated
 
-# Discord Server (optional - comment out to bypass)
-DISCORD_GUILD_ID=your_discord_server_id
-DISCORD_REQUIRED_ROLE_ID=your_required_role_id
+# Discord Bot Configuration (Optional - for role verification)
+DISCORD_BOT_TOKEN=your_discord_bot_token # Bot token to allow role authentication
 
-# SonoranCAD API
-SONORAN_API_ID=your_sonoran_api_id
-SONORAN_API_KEY=your_sonoran_api_key
-SONORAN_COMMUNITY_ID=your_sonoran_community_id
+# SonoranCAD API Configuration
+SONORAN_API_KEY=your_sonoran_api_key # API key for community (NOT PERSONAL ONE)
+SONORAN_COMMUNITY_ID=your_sonoran_community_id # Community ID
 
-# Server
-SESSION_SECRET=your_session_secret_key
-PORT=3000
-NODE_ENV=development
+# Session Configuration
+SESSION_SECRET=your_session_secret_key # Random string for encrypting cookies
 
-# Redis (optional)
+# Server Configuration
+PORT=3000 # Port for webserver to run on
+NODE_ENV=development # Development or production
+
+# CORS Configuration (Optional - for production)
+CORS_ORIGIN=your-production-domain.com
+
+# Logging Configuration (Optional - defaults provided)
+LOG_LEVEL=debug
+LOG_FORMAT=combined
+ENABLE_CONSOLE_LOGGING=true
+ENABLE_FILE_LOGGING=false
+LOG_FILE=logs/app.log
+
+# Redis Configuration (Optional - for caching)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_DB=0
+
+# SQLite Configuration (Optional - defaults provided)
+SQLITE_PATH=./data/database.sqlite
+SQLITE_BACKUP_PATH=./data/backups
 ```
 
 ## Usage

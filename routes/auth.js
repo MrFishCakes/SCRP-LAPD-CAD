@@ -3,6 +3,7 @@ const passport = require('passport');
 const { asyncHandler } = require('../middleware/error');
 const { checkCookieAuth } = require('../middleware/simple-auth');
 const database = require('../config/hybrid-database');
+const discordAPI = require('../lib/discord-api');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -73,9 +74,28 @@ router.get('/discord/callback',
     passport.authenticate('discord', { failureRedirect: '/no-hello' }),
     asyncHandler(async (req, res) => {
         try {
-            // Save user to database
+            // Check admin access in production mode
+            let adminAccess = false;
+            if (process.env.NODE_ENV === 'production') {
+                adminAccess = await discordAPI.checkAdminAccess(req.user.id);
+                logger.info('Admin access check completed', { 
+                    discordId: req.user.id, 
+                    username: req.user.username,
+                    adminAccess 
+                });
+            } else {
+                // In development, grant admin access to all users
+                adminAccess = true;
+                logger.info('Development mode: Granting admin access', { 
+                    discordId: req.user.id, 
+                    username: req.user.username 
+                });
+            }
+
+            // Save user to database with admin access status
             await database.saveUser(req.user.id, {
-                username: req.user.username
+                username: req.user.username,
+                adminAccess: adminAccess
             });
             
             // Set authentication cookie
@@ -89,7 +109,8 @@ router.get('/discord/callback',
             
             logger.info('User authenticated successfully', { 
                 discordId: req.user.id, 
-                username: req.user.username 
+                username: req.user.username,
+                adminAccess 
             });
             
             // Redirect to hello world page

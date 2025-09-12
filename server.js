@@ -8,6 +8,7 @@ const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors');
 const helmet = require('helmet');
+const path = require('path');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 
@@ -81,6 +82,17 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// View engine setup
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// EJS layout setup
+const expressLayouts = require('express-ejs-layouts');
+app.use(expressLayouts);
+app.set('layout', 'admin/layout');
+app.set('layout extractScripts', true);
+app.set('layout extractStyles', true);
+
 // Static files
 app.use(express.static('public'));
 
@@ -107,6 +119,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
+app.use('/admin', require('./routes/admin'));
 app.use('/', webRoutes);
 
 // Error handling middleware

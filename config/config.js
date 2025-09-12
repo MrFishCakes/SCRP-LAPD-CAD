@@ -25,7 +25,6 @@ class Config {
     // SonoranCAD API Configuration
     get sonoran() {
         return {
-            apiId: process.env.SONORAN_API_ID,
             apiKey: process.env.SONORAN_API_KEY,
             communityId: process.env.SONORAN_COMMUNITY_ID,
             baseUrl: 'https://api.sonoransoftware.com',
@@ -107,7 +106,6 @@ class Config {
         const required = [
             'DISCORD_CLIENT_ID',
             'DISCORD_CLIENT_SECRET',
-            'SONORAN_API_ID',
             'SONORAN_API_KEY',
             'SONORAN_COMMUNITY_ID'
         ];

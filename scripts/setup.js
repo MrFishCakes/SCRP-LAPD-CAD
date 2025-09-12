@@ -63,7 +63,6 @@ console.log('\n🔍 Validating environment variables...');
 const requiredVars = [
     'DISCORD_CLIENT_ID',
     'DISCORD_CLIENT_SECRET',
-    'SONORAN_API_ID',
     'SONORAN_API_KEY',
     'SONORAN_COMMUNITY_ID'
 ];
