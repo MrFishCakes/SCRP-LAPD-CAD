@@ -1,3 +1,6 @@
+# Stored Data
+data/
+
 # Dependencies
 node_modules/
 npm-debug.log*
