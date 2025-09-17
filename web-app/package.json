@@ -1,0 +1,55 @@
+{
+  "name": "sonoran-cad-web-app",
+  "version": "1.0.0",
+  "description": "Web application for SonoranCAD API integration with Discord OAuth",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "diagnose": "node scripts/auth/diagnose-discord.js",
+    "test-cookie-security": "node scripts/auth/test-cookie-security.js",
+    "fix-discord-oauth": "node scripts/auth/fix-discord-oauth.js",
+    "generate-secrets": "node scripts/auth/generate-secrets.js",
+    "test-logout": "node scripts/auth/test-comprehensive-logout.js",
+    "test-analytics": "node scripts/test-analytics.js",
+    "create-sessions": "node scripts/create-sessions-for-existing-users.js",
+    "view-users": "node scripts/database/view-users.js",
+    "rebuild-db": "node scripts/database/rebuild-database.js",
+    "fix-db": "node scripts/database/fix-database-schema.js",
+    "test-db": "node scripts/database/test-hybrid-db.js",
+    "manage-admin": "node scripts/database/manage-admin-access.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@sonoransoftware/sonoran.js": "^1.0.32",
+    "axios": "^1.12.1",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.2.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.10",
+    "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-rate-limit": "^7.1.5",
+    "express-session": "^1.17.3",
+    "helmet": "^7.1.0",
+    "node-fetch": "^2.7.0",
+    "passport": "^0.6.0",
+    "passport-discord": "^0.1.4",
+    "redis": "^5.8.2",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "sonoran",
+    "cad",
+    "discord",
+    "oauth",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT"
+}

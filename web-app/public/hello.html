@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PremierOne Mobile Client</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .tablet-container {
+            width: 100vw;
+            height: 100vh;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* Top Bar */
+        .top-bar {
+            background: #0f3460;
+            padding: 8px 16px;
+            border-bottom: 2px solid #16213e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .app-title {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .status-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .sam-btn {
+            background: #4a90e2;
+            color: white;
+        }
+        
+        .stop-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .pending-btn {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .audio-btn {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .audio-btn:hover {
+            background: #2ecc71;
+        }
+        
+        .audio-btn.disabled {
+            background: #e74c3c;
+        }
+        
+        .audio-btn.disabled:hover {
+            background: #c0392b;
+        }
+        
+        .test-btn {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .test-btn:hover {
+            background: #8e44ad;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .unread-btn {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+        
+        .status-indicator {
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .gps-online {
+            color: #27ae60;
+        }
+        
+        /* Navigation Bar */
+        .nav-bar {
+            background: #16213e;
+            padding: 8px 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border-bottom: 1px solid #2c3e50;
+        }
+        
+        .nav-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid #34495e;
+            border-radius: 4px;
+            color: #ecf0f1;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background: #34495e;
+            border-color: #4a90e2;
+        }
+        
+        .nav-btn.active {
+            background: #4a90e2;
+            border-color: #4a90e2;
+        }
+        
+        /* Incident Location Banner */
+        .incident-banner {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* Left Sidebar */
+        .sidebar {
+            width: 200px;
+            background: #16213e;
+            border-right: 1px solid #2c3e50;
+            overflow-y: auto;
+        }
+        
+        .sidebar-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #2c3e50;
+            cursor: pointer;
+            font-size: 14px;
+            color: #ecf0f1;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-item:hover {
+            background: #34495e;
+        }
+        
+        .sidebar-item.active {
+            background: #4a90e2;
+            color: white;
+        }
+        
+        .sidebar-icon {
+            width: 16px;
+            height: 16px;
+            background: #7f8c8d;
+            border-radius: 2px;
+        }
+        
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #0f3460;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Active Incident Header */
+        .incident-header {
+            background: #16213e;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2c3e50;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        /* Incident Details */
+        .incident-details {
+            padding: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            width: 120px;
+            color: #bdc3c7;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #ecf0f1;
+        }
+        
+        .units-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        
+        .unit-tag {
+            padding: 2px 6px;
+            background: #27ae60;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .unit-tag.inactive {
+            background: #7f8c8d;
+        }
+        
+        /* Incident Narrative */
+        .narrative-section {
+            margin-top: 20px;
+            background: #16213e;
+            border-radius: 6px;
+            padding: 16px;
+        }
+        
+        .narrative-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .narrative-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        .auto-scroll-btn {
+            padding: 4px 8px;
+            background: #4a90e2;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .narrative-text {
+            background: #0f3460;
+            border: 1px solid #2c3e50;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #ecf0f1;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        /* Bottom Action Bar */
+        .action-bar {
+            background: #16213e;
+            padding: 12px 16px;
+            border-top: 1px solid #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            background: #34495e;
+            border: 1px solid #4a90e2;
+            border-radius: 4px;
+            color: #ecf0f1;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: #4a90e2;
+        }
+        
+        .action-btn.primary {
+            background: #4a90e2;
+        }
+        
+        .action-btn.danger {
+            background: #e74c3c;
+            border-color: #e74c3c;
+        }
+        
+        .status-time {
+            font-size: 14px;
+            color: #bdc3c7;
+            text-align: right;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 160px;
+            }
+            
+            .detail-label {
+                width: 100px;
+            }
+            
+            .nav-bar {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            
+            .nav-btn {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+        
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #4a90e2;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #e74c3c;
+        }
+        
+        .notification.warning {
+            background: #f39c12;
+        }
+        
+        /* Calls Panel Styles */
+        .calls-panel {
+            background: #16213e;
+            border-bottom: 1px solid #2c3e50;
+            padding: 15px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+        
+        .calls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calls-header h3 {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .calls-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .calls-controls .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .calls-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #0f3460;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .call-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #4a90e2;
+            transition: all 0.3s ease;
+        }
+        
+        .call-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .call-item.high-priority {
+            border-left-color: #e74c3c;
+        }
+        
+        .call-item.critical-priority {
+            border-left-color: #ffd700;
+        }
+        
+        .call-item.medium-priority {
+            border-left-color: #f39c12;
+        }
+        
+        .call-item.low-priority {
+            border-left-color: #27ae60;
+        }
+        
+        .call-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .call-id {
+            font-weight: bold;
+            color: #ffd700;
+            font-size: 14px;
+        }
+        
+        .call-priority {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .priority-low {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .priority-high {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .priority-critical {
+            background: #ffd700;
+            color: #1a365d;
+        }
+        
+        .call-details {
+            font-size: 13px;
+            color: #bdc3c7;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .call-source {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .call-actions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .call-actions .btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            margin: 0;
+        }
+        
+        .units-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        
+        .unit-tag {
+            background: #27ae60;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .no-calls {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .calls-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .stat-number {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: 15% auto;
+            padding: 0;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            color: #fff;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .form-group select option {
+            background-color: #2a2a2a;
+            color: #fff;
+            padding: 8px;
+        }
+
+        .rank-select {
+            font-weight: 500;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="app-title">PremierOne Mobile Client</div>
+            <div class="status-buttons">
+                <button class="status-btn sam-btn" id="samBtn">SAM 123</button>
+                <button class="status-btn stop-btn" id="stopBtn">STOP</button>
+                <div class="unread-btn" id="unreadCount">0</div>
+                <button class="status-btn pending-btn" id="pendingBtn">PENDING</button>
+                <button class="status-btn" id="refreshBtn" onclick="fetchActiveCalls()">REFRESH</button>
+                <button class="status-btn audio-btn" id="audioBtn" onclick="toggleAudio()" title="Toggle Audio">🔊</button>
+                <button class="status-btn test-btn" id="testBtn" onclick="testAudio()" title="Test Audio">TEST</button>
+                <button class="status-btn" id="sonoranUuidBtn" onclick="showSonoranUuidModal()" title="SonoranCAD UUID">UUID</button>
+            </div>
+            <div class="status-indicators">
+                <span class="status-indicator" id="rankStatus">Rank</span>
+                <span class="status-indicator" id="nightMode">Night</span>
+                <span class="status-indicator" id="vehicleStatus">In Vehicle</span>
+                <span class="status-indicator" id="enrouteStatus">Enroute</span>
+                <span class="status-indicator gps-online" id="gpsStatus">GPS Online</span>
+                <span class="status-indicator" id="connectionStatus">Connecting...</span>
+            </div>
+        </div>
+        
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button class="nav-btn active" onclick="showPanel('home')">Home</button>
+            <button class="nav-btn" onclick="showPanel('query')">Query</button>
+            <button class="nav-btn" onclick="showPanel('traffic')">Traffic</button>
+            <button class="nav-btn" onclick="showPanel('c6')">C6</button>
+            <button class="nav-btn" onclick="showPanel('calls')">Calls</button>
+            <button class="nav-btn" onclick="showPanel('dispatch')">Dispatch</button>
+            <button class="nav-btn" onclick="showPanel('as')">AS</button>
+            <button class="nav-btn" onclick="showPanel('station')">Station</button>
+            <button class="nav-btn" onclick="showPanel('dispo')">Dispo</button>
+            </div>
+        
+        <!-- Incident Location Banner -->
+        <div class="incident-banner">
+            Incident Location: 251 E 6TH ST, LA
+        </div>
+        
+        <!-- Calls Panel -->
+        <div class="calls-panel" id="callsPanel" style="display: none;">
+            <div class="calls-header">
+                <h3>🚨 Active 911 Calls</h3>
+                <div class="calls-controls">
+                    <button class="btn btn-primary" onclick="refreshCalls()">Refresh</button>
+                    <button class="btn btn-success" onclick="window.open('/simulation', '_blank')">Simulation</button>
+                    <button class="btn btn-warning" onclick="toggleCallsPanel()">Close</button>
+    </div>
+            </div>
+            <div class="calls-list" id="callsList">
+                <div class="no-calls">Loading active calls...</div>
+            </div>
+    </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-item active">
+                    <div class="sidebar-icon"></div>
+                    Summary
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Persons
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Vehicles
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Prem/Haz (33)
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Previous (50)
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Attachment
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Query Results
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Incident History
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Comments
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Incident Info
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Status Times
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon"></div>
+                    Unit Details (8)
+                </div>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Active Incident Header -->
+                <div class="incident-header">
+                    Active Incident
+                </div>
+                
+                <!-- Incident Details -->
+                <div class="incident-details">
+                    <div class="detail-row">
+                        <div class="detail-label">Incident Type:</div>
+                        <div class="detail-value">820 STATI...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Inc #:</div>
+                        <div class="detail-value">PD25060700003627</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Mod Circum:</div>
+                        <div class="detail-value"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Location:</div>
+                        <div class="detail-value">251 E 6TH ST</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Loc Name:</div>
+                        <div class="detail-value">CENTRAL DIVISION</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Incident Status:</div>
+                        <div class="detail-value">Active</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Apt/Unit:</div>
+                        <div class="detail-value"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Report #:</div>
+                        <div class="detail-value"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">City:</div>
+                        <div class="detail-value">LA</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Cross Streets:</div>
+                        <div class="detail-value">600 WALL ST / 600 MAPLE AV</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Units:</div>
+                        <div class="detail-value">
+                            <div class="units-list">
+                                <span class="unit-tag">2G20-W5</span>
+                                <span class="unit-tag inactive">2G25-W5</span>
+                                <span class="unit-tag inactive">2G21-W5</span>
+                                <span class="unit-tag">5G70-W5</span>
+                                <span class="unit-tag">5G62-W5</span>
+                                <span class="unit-tag">5G63-W5</span>
+                                <span class="unit-tag">21G30-W7</span>
+                                <span class="unit-tag">21G31-W7</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Call Initiated:</div>
+                        <div class="detail-value">06/07/2025 19:41:43</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Beat:</div>
+                        <div class="detail-value">0155</div>
+                    </div>
+                    
+                    <!-- Incident Narrative -->
+                    <div class="narrative-section">
+                        <div class="narrative-header">
+                            <div class="narrative-title">Incident Narrative/Comments</div>
+                            <button class="auto-scroll-btn">Auto Scroll</button>
+                        </div>
+                        <div class="narrative-text" id="narrativeText">5G62, 5G63, 5G70 RESP C3 FROM HARB DIV SHORTLY
+NOTIFIED VCDC W/C SGT DAVIS
+NTFD VCDC WC VIA VCDC WC AIDE
+COMMANDER LIUM REQUEST ALL CITYWIDE GED ACTIVATED
+AND RESPOND TO CENTRAL DIVISION 2ND FLOOR VIA SGT
+YERKEY SERIAL 35188</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Action Bar -->
+        <div class="action-bar">
+            <div class="action-buttons">
+                <button class="action-btn">Edit</button>
+                <button class="action-btn">Create Report</button>
+                <button class="action-btn danger">Clear Incident</button>
+                <button class="action-btn">Close View</button>
+                <button class="action-btn primary">Primary Unit</button>
+                <button class="action-btn">Import to Incident</button>
+                <button class="action-btn">Locate on Mobile Map</button>
+                <button class="action-btn" onclick="window.open('/simulation', '_blank')">Simulation Dashboard</button>
+            </div>
+            <div class="status-time">
+                <div id="currentTime">7:56 PM</div>
+                <div id="currentDate">6/7/2025</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <!-- SonoranCAD User Profile Modal -->
+    <div id="sonoranUuidModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>SonoranCAD Profile Setup</h3>
+            </div>
+            <div class="modal-body">
+                <p>Please complete your SonoranCAD profile to enable full integration:</p>
+                <div class="form-group">
+                    <label for="callsignInput">Callsign:</label>
+                    <input type="text" id="callsignInput" placeholder="e.g., 1L10, 2A15" />
+                </div>
+                <div class="form-group">
+                    <label for="nameInput">Full Name:</label>
+                    <input type="text" id="nameInput" placeholder="Enter your full name" />
+                </div>
+                <div class="form-group">
+                    <label for="rankInput">Police Rank (Rank you are patrolling as):</label>
+                    <select id="rankInput" class="rank-select">
+                        <option value="">Select Rank</option>
+                        <option value="Chief of Police">Chief of Police</option>
+                        <option value="Assistant Chief of Police">Assistant Chief of Police</option>
+                        <option value="Deputy Chief of Police">Deputy Chief of Police</option>
+                        <option value="Commander">Commander</option>
+                        <option value="Captain">Captain</option>
+                        <option value="Lieutenant">Lieutenant</option>
+                        <option value="Sergeant II">Sergeant II</option>
+                        <option value="Sergeant I">Sergeant I</option>
+                        <option value="Detective III">Detective III</option>
+                        <option value="Detective II">Detective II</option>
+                        <option value="Detective I">Detective I</option>
+                        <option value="Police Officer III+1">Police Officer III+1</option>
+                        <option value="Police Officer III">Police Officer III</option>
+                        <option value="Police Officer II">Police Officer II</option>
+                        <option value="Police Officer I">Police Officer I</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="saveSonoranProfile()">Save Profile</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LA Time synchronization with reliable time servers
+        let timeOffset = 0; // Offset from local time to LA time
+        let lastSyncTime = 0;
+        const SYNC_INTERVAL = 60000; // Sync every 1 minute for better accuracy
+        
+        // Sync time with reliable time servers (with fallback)
+        async function syncWithTimeServers() {
+            try {
+                // Try multiple reliable time APIs with timeout
+                const timeApis = [
+                    'https://worldtimeapi.org/api/timezone/America/Los_Angeles',
+                    'https://timeapi.io/api/Time/current/zone?timeZone=America/Los_Angeles'
+                ];
+                
+                let success = false;
+                for (const apiUrl of timeApis) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                        
+                        const response = await fetch(apiUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const serverTime = new Date(data.datetime || data.currentDateTime || data.utc_datetime);
+                            const localTime = new Date();
+                            
+                            // Calculate offset between server time and local time
+                            timeOffset = serverTime.getTime() - localTime.getTime();
+                            lastSyncTime = Date.now();
+                            
+                            console.log('Time synchronized with server:', serverTime.toISOString());
+                            success = true;
+                            break;
+                        }
+                    } catch (apiError) {
+                        console.log(`Failed to sync with ${apiUrl}:`, apiError.message);
+                        continue;
+                    }
+                }
+                
+                if (!success) {
+                    throw new Error('All time servers failed');
+                }
+            } catch (error) {
+                console.log('Failed to sync with time servers, using local timezone calculation:', error.message);
+                // Fallback: calculate LA timezone offset manually
+                const now = new Date();
+                const laTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Los_Angeles"}));
+                const utcTime = new Date(now.toLocaleString("en-US", {timeZone: "UTC"}));
+                timeOffset = laTime.getTime() - utcTime.getTime();
+                lastSyncTime = Date.now();
+            }
+        }
+        
+        // Force resync time (call this when page updates)
+        function forceResyncTime() {
+            syncWithTimeServers();
+        }
+        
+        // Update time and date with LA timezone
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Check if we need to sync with time servers
+            if (Date.now() - lastSyncTime > SYNC_INTERVAL) {
+                syncWithTimeServers();
+            }
+            
+            // Apply LA timezone offset
+            const laTime = new Date(now.getTime() + timeOffset);
+            
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'America/Los_Angeles'
+            };
+            const dateOptions = { 
+                month: '2-digit', 
+                day: '2-digit', 
+                year: 'numeric',
+                timeZone: 'America/Los_Angeles'
+            };
+            
+            document.getElementById('currentTime').textContent = laTime.toLocaleTimeString('en-US', timeOptions);
+            document.getElementById('currentDate').textContent = laTime.toLocaleDateString('en-US', dateOptions);
+        }
+        
+        // Initialize time sync and start updating
+        syncWithTimeServers(); // Initial sync with time servers
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+        
+        // Sidebar navigation
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Navigation bar
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Panel management
+        function showPanel(panelName) {
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (panelName === 'calls') {
+                toggleCallsPanel();
+            } else {
+                // Hide calls panel if showing other panels
+                document.getElementById('callsPanel').style.display = 'none';
+            }
+        }
+        
+        function toggleCallsPanel() {
+            const panel = document.getElementById('callsPanel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                loadCallsPanel();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        
+        // Action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.textContent;
+                showNotification(`Action: ${action}`, 'info');
+            });
+        });
+        
+        // Status buttons
+        document.querySelector('.stop-btn').addEventListener('click', function() {
+            showNotification('Emergency Stop Activated', 'error');
+        });
+        
+        document.querySelector('.pending-btn').addEventListener('click', function() {
+            showNotification('Pending Items: 6', 'warning');
+        });
+        
+        // Auto scroll functionality
+        document.querySelector('.auto-scroll-btn').addEventListener('click', function() {
+            const narrative = document.getElementById('narrativeText');
+            narrative.scrollTop = narrative.scrollHeight;
+            showNotification('Auto-scrolled to bottom', 'info');
+        });
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            container.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => container.removeChild(notification), 300);
+            }, 3000);
+        }
+        
+        // Simulate real-time updates (for testing)
+        function simulateUpdates() {
+            // Simulate new narrative entries
+            setTimeout(() => {
+                const narrative = document.getElementById('narrativeText');
+                narrative.textContent += '\n\nUPDATE: All units responding to Central Division';
+                showNotification('New narrative update received', 'info');
+            }, 10000);
+            
+            // Simulate status changes
+            setTimeout(() => {
+                const units = document.querySelectorAll('.unit-tag');
+                units.forEach(unit => {
+                    if (unit.classList.contains('inactive')) {
+                        unit.classList.remove('inactive');
+                        unit.style.background = '#27ae60';
+                    }
+                });
+                showNotification('Unit status updated', 'info');
+            }, 15000);
+        }
+        
+        // Start simulation
+        simulateUpdates();
+        
+        // Fetch active calls from both SonoranCAD API and simulation
+        async function fetchActiveCalls() {
+            try {
+                // Try SonoranCAD API first
+                let sonoranCalls = [];
+                try {
+                    const sonoranResponse = await fetch('/sonoran/calls/active');
+                    const sonoranData = await sonoranResponse.json();
+                    if (sonoranData.success && sonoranData.calls) {
+                        sonoranCalls = sonoranData.calls;
+                    }
+                } catch (error) {
+                    console.log('SonoranCAD API not available:', error.message);
+                }
+                
+                // Try simulation API
+                let simulatedCalls = [];
+                try {
+                    const simResponse = await fetch('/simulation/calls');
+                    const simData = await simResponse.json();
+                    if (simData.success && simData.data.calls) {
+                        simulatedCalls = simData.data.calls;
+                    }
+                } catch (error) {
+                    console.log('Simulation API not available:', error.message);
+                }
+                
+                // Combine all calls
+                const allCalls = [...sonoranCalls, ...simulatedCalls];
+                
+                if (allCalls.length > 0) {
+                    updateIncidentData(allCalls[0]); // Use first active call
+                    showNotification(`Loaded ${allCalls.length} active calls (${sonoranCalls.length} real, ${simulatedCalls.length} simulated)`, 'info');
+                } else {
+                    showNotification('No active calls found', 'warning');
+                }
+            } catch (error) {
+                console.error('Error fetching calls:', error);
+                showNotification('Failed to load call data', 'error');
+            }
+        }
+        
+        // Update incident data with real call information
+        function updateIncidentData(call) {
+            // Update incident details
+            const details = {
+                'Incident Type:': call.description || '911 Call',
+                'Inc #:': call.id || 'N/A',
+                'Location:': call.location || 'Unknown Location',
+                'Loc Name:': 'CENTRAL DIVISION',
+                'Incident Status:': call.status || 'Active',
+                'City:': 'LA',
+                'Cross Streets:': '600 WALL ST / 600 MAPLE AV',
+                'Call Initiated:': new Date(call.createdAt).toLocaleString(),
+                'Beat:': '0155'
+            };
+            
+            // Update the detail rows
+            Object.entries(details).forEach(([label, value]) => {
+                const rows = document.querySelectorAll('.detail-row');
+                rows.forEach(row => {
+                    const labelElement = row.querySelector('.detail-label');
+                    if (labelElement && labelElement.textContent.includes(label.replace(':', ''))) {
+                        const valueElement = row.querySelector('.detail-value');
+                        if (valueElement) {
+                            valueElement.textContent = value;
+                        }
+                    }
+                });
+            });
+            
+            // Update incident banner
+            const banner = document.querySelector('.incident-banner');
+            if (banner && call.location) {
+                banner.textContent = `Incident Location: ${call.location}`;
+            }
+            
+            // Update narrative
+            const narrative = document.getElementById('narrativeText');
+            if (narrative && call.description) {
+                narrative.textContent = `911 CALL RECEIVED
+Location: ${call.location}
+Caller: ${call.callerName || 'Unknown'}
+Priority: ${call.priority || 'Medium'}
+Description: ${call.description}
+
+Units assigned: ${call.assignedUnits ? call.assignedUnits.join(', ') : 'None'}`;
+            }
+        }
+        
+        // Global WebSocket variable
+        let ws = null;
+        
+        // Audio management
+        let audioEnabled = true;
+        let lastAudioPlayTime = 0;
+        const AUDIO_COOLDOWN = 2000; // 2 seconds between audio plays
+        
+        // Audio playback function with cooldown
+        function playDispatchAudio(audioFile = '/audio/INCOMING_911_TONE.mp3') {
+            if (!audioEnabled) return;
+            
+            const now = Date.now();
+            if (now - lastAudioPlayTime < AUDIO_COOLDOWN) {
+                return;
+            }
+            
+            try {
+                const audio = new Audio(audioFile);
+                audio.volume = 0.8; // Set volume to 80%
+                
+                // Visual feedback - flash the audio button
+                const audioBtn = document.getElementById('audioBtn');
+                if (audioBtn) {
+                    audioBtn.style.animation = 'pulse 0.5s ease-in-out';
+                    setTimeout(() => {
+                        audioBtn.style.animation = '';
+                    }, 500);
+                }
+                
+                // Play audio with error handling
+                audio.addEventListener('canplaythrough', () => {
+                    audio.play().then(() => {
+                        lastAudioPlayTime = now;
+                    }).catch(e => {
+                        // Fallback to Web Audio API if play fails
+                        playWebAudioFallback();
+                    });
+                });
+                
+                audio.addEventListener('error', (e) => {
+                    // Fallback to Web Audio API if file fails
+                    playWebAudioFallback();
+                });
+                
+                audio.load();
+                
+            } catch (e) {
+                // Fallback to Web Audio API
+                playWebAudioFallback();
+            }
+        }
+        
+        // Fallback audio using Web Audio API
+        function playWebAudioFallback() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                // Create triple beep pattern
+                const playBeep = (delay = 0) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        oscillator.type = 'sine';
+                        
+                        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+                        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.1);
+                    }, delay);
+                };
+                
+                // Play three beeps
+                playBeep(0);
+                playBeep(150);
+                playBeep(300);
+                
+            } catch (e) {
+                // Silent failure
+            }
+        }
+        
+        
+        // Test audio function
+        function testAudio() {
+            playDispatchAudio();
+            showNotification('Testing dispatch audio...', 'info');
+        }
+        
+        // Toggle audio on/off
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const audioBtn = document.getElementById('audioBtn');
+            
+            if (audioEnabled) {
+                audioBtn.textContent = '🔊';
+                audioBtn.classList.remove('disabled');
+                showNotification('Audio enabled', 'success');
+            } else {
+                audioBtn.textContent = '🔇';
+                audioBtn.classList.add('disabled');
+                showNotification('Audio disabled', 'warning');
+            }
+        }
+        
+        // WebSocket connection for real-time updates
+        function connectWebSocket() {
+            try {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws`;
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    showNotification('Connected to dispatch system', 'info');
+                    updateConnectionStatus('Connected');
+                    
+                    // Send initial subscription message
+                    ws.send(JSON.stringify({
+                        type: 'subscribe',
+                        subscriptions: ['new_call', 'call_update', 'call_closed']
+                    }));
+                };
+                
+                ws.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'new_call') {
+                        // Handle the nested data structure from our API
+                        const call = data.data ? data.data.call : data.call;
+                        updateIncidentData(call);
+                        showNotification('New 911 call received!', 'error');
+                        
+                        // Always refresh calls panel to show new call
+                        loadCallsPanel();
+                        
+                        // Play notification sound for new calls only
+                        playDispatchAudio();
+                    } else if (data.type === 'call_update') {
+                        // Handle the nested data structure from our API
+                        const call = data.data ? data.data.call : data.call;
+                        updateIncidentData(call);
+                        showNotification('Call updated', 'info');
+                        
+                        // No audio for call updates - only for incoming calls
+                        
+                        // Always refresh calls panel to show updated call
+                        loadCallsPanel();
+                    } else if (data.type === 'call_closed') {
+                        showNotification('Call closed', 'info');
+                        
+                        // No audio for closed calls - only for incoming calls
+                        
+                        // Refresh calls panel if it's open
+                        const callsPanel = document.getElementById('callsPanel');
+                        if (callsPanel.style.display !== 'none') {
+                            loadCallsPanel();
+                        }
+                        
+                        // Check if the closed call was the one we were attached to
+                        const attachedCallData = localStorage.getItem('attachedCall');
+                        if (attachedCallData) {
+                            try {
+                                const { callId } = JSON.parse(attachedCallData);
+                                if (callId === data.callId) {
+                                    // Clear attachment since call is closed
+                                    localStorage.removeItem('attachedCall');
+                                    clearActiveIncident();
+                                    showNotification('Attached call was closed', 'warning');
+                                }
+                            } catch (error) {
+                                console.error('Error checking attached call:', error);
+                            }
+                        }
+                    }
+                };
+                
+                ws.onclose = function(event) {
+                    showNotification('Disconnected from dispatch system', 'warning');
+                    updateConnectionStatus('Disconnected');
+                    
+                    // Reconnect after 5 seconds
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                ws.onerror = function(error) {
+                    showNotification('Connection error', 'error');
+                };
+                
+            } catch (error) {
+                showNotification('WebSocket connection failed', 'error');
+            }
+        }
+        
+        // Update connection status indicator
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (statusElement) {
+                statusElement.textContent = status;
+                statusElement.className = `status-indicator ${status.toLowerCase()}`;
+                
+                if (status === 'Connected') {
+                    statusElement.style.color = '#27ae60';
+                } else if (status === 'Disconnected') {
+                    statusElement.style.color = '#e74c3c';
+                } else {
+                    statusElement.style.color = '#f39c12';
+                }
+            }
+        }
+        
+        // Update unread count
+        function updateUnreadCount(count) {
+            const unreadElement = document.getElementById('unreadCount');
+            if (unreadElement) {
+                unreadElement.textContent = count;
+            }
+        }
+        
+        // Toggle night mode
+        function toggleNightMode() {
+            const nightElement = document.getElementById('nightMode');
+            if (nightElement) {
+                const isNight = nightElement.textContent === 'Night';
+                nightElement.textContent = isNight ? 'Day' : 'Night';
+                nightElement.style.color = isNight ? '#f39c12' : '#bdc3c7';
+            }
+        }
+        
+        // Update vehicle status
+        function updateVehicleStatus(status) {
+            const vehicleElement = document.getElementById('vehicleStatus');
+            if (vehicleElement) {
+                vehicleElement.textContent = status;
+            }
+        }
+        
+        // Update enroute status
+        function updateEnrouteStatus(status) {
+            const enrouteElement = document.getElementById('enrouteStatus');
+            if (enrouteElement) {
+                enrouteElement.textContent = status;
+            }
+        }
+        
+        // Initialize
+        connectWebSocket();
+        
+        // Preload audio file for better performance
+        const audioPreload = new Audio('/audio/INCOMING_911_TONE.mp3');
+        audioPreload.preload = 'auto';
+        audioPreload.load();
+        
+        // Load initial call data
+        setTimeout(fetchActiveCalls, 2000);
+        
+        // Poll for new calls every 5 seconds as a fallback
+        let lastCallCount = 0;
+        setInterval(async () => {
+            try {
+                const response = await fetch('/calls/active');
+                const data = await response.json();
+                const currentCallCount = data.calls ? data.calls.length : 0;
+                
+                // Note: Audio for new calls is handled by WebSocket 'new_call' events
+                // This polling is just a fallback to ensure UI stays in sync
+                
+                // Resync time on each polling cycle
+                forceResyncTime();
+                
+                lastCallCount = currentCallCount;
+            } catch (error) {
+                // Silent error handling
+            }
+        }, 5000);
+        
+        // Calls panel functionality
+        async function loadCallsPanel() {
+            const callsList = document.getElementById('callsList');
+            callsList.innerHTML = '<div class="no-calls">Loading active calls...</div>';
+            
+            // Resync time when page updates
+            forceResyncTime();
+            
+            try {
+                console.log('Loading calls panel...');
+                // Get calls from both sources
+                const allCalls = await getAllActiveCalls();
+                console.log('Retrieved calls:', allCalls);
+                displayCallsInPanel(allCalls);
+            } catch (error) {
+                console.error('Error loading calls panel:', error);
+                callsList.innerHTML = '<div class="no-calls">Error loading calls</div>';
+            }
+        }
+        
+        async function getAllActiveCalls() {
+            const allCalls = [];
+            
+            // Try Redis calls API (now returns all active calls)
+            try {
+                const redisResponse = await fetch('/api/calls');
+                
+                if (!redisResponse.ok) {
+                    throw new Error(`HTTP ${redisResponse.status}: ${redisResponse.statusText}`);
+                }
+                
+                const redisData = await redisResponse.json();
+                
+                // Now this returns all active calls from Redis, sorted by newest first
+                if (redisData.success && redisData.calls && redisData.calls.length > 0) {
+                    redisData.calls.forEach(call => {
+                        call.source = 'Redis Cache';
+                        allCalls.push(call);
+                    });
+                }
+            } catch (error) {
+                console.error('Redis calls API error:', error);
+            }
+            
+            // Try Simulation API
+            try {
+                const simResponse = await fetch('/simulation/calls');
+                const simData = await simResponse.json();
+                if (simData.success && simData.data.calls) {
+                    simData.data.calls.forEach(call => {
+                        call.source = 'Simulation';
+                        allCalls.push(call);
+                    });
+                }
+            } catch (error) {
+                console.log('Simulation API not available:', error.message);
+            }
+            
+            return allCalls;
+        }
+        
+        // Get the appropriate attach button based on current attachment status
+        function getAttachButton(callId, callSource) {
+            const attachedCallData = localStorage.getItem('attachedCall');
+            if (attachedCallData) {
+                try {
+                    const { callId: attachedCallId } = JSON.parse(attachedCallData);
+                    if (attachedCallId === callId) {
+                        return `<button class="btn btn-success" disabled>Attached</button>`;
+                    }
+                } catch (error) {
+                    console.error('Error parsing attached call data:', error);
+                }
+            }
+            return `<button class="btn btn-info" onclick="attachToCall('${callId}', '${callSource}')">Attach</button>`;
+        }
+        
+        function displayCallsInPanel(calls) {
+            const callsList = document.getElementById('callsList');
+            
+            if (calls.length === 0) {
+                callsList.innerHTML = '<div class="no-calls">No active calls<br><small>All calls are loaded from Redis</small></div>';
+                return;
+            }
+            
+            // Sort calls by priority (Critical > High > Medium > Low)
+            const priorityOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+            calls.sort((a, b) => (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0));
+            
+            callsList.innerHTML = `
+                <div class="calls-stats">
+                    <div class="stat-item">
+                        <span>Total:</span>
+                        <span class="stat-number">${calls.length}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>High Priority:</span>
+                        <span class="stat-number">${calls.filter(c => c.priority === 'High' || c.priority === 'Critical').length}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Assigned:</span>
+                        <span class="stat-number">${calls.filter(c => c.assignedUnits && c.assignedUnits.length > 0).length}</span>
+                    </div>
+                </div>
+                ${calls.map(call => {
+                    // Ensure priority is a string and has a default value
+                    const priority = String(call.priority || 'Medium');
+                    const priorityLower = priority.toLowerCase();
+                    
+                    return `
+                    <div class="call-item ${priorityLower}-priority">
+                        <div class="call-header">
+                            <div class="call-id">${call.callId || call.id}</div>
+                            <div class="call-priority priority-${priorityLower}">${priority}</div>
+                        </div>
+                        <div class="call-details">
+                            <strong>${call.title || call.description || call.callType || '911 Call'}</strong><br>
+                            ${call.description ? `<em>${call.description}</em><br>` : ''}
+                            Location: ${call.block ? `${call.block} ` : ''}${call.address || call.location || 'Unknown'}<br>
+                            Caller: ${call.callerName || 'Not Stated'}<br>
+                            Priority: ${call.priority || 'Unknown'}<br>
+                            Status: ${call.status || 'Active'}<br>
+                            Created: ${new Date(call.timestamp || call.createdAt || Date.now()).toLocaleString()}
+                        </div>
+                        <div class="call-source">Source: ${call.source}</div>
+                        <div class="call-actions">
+                            ${getAttachButton(call.callId || call.id, call.source)}
+                            <button class="btn btn-primary" onclick="assignRandomUnit('${call.callId || call.id}', '${call.source}')">Assign Unit</button>
+                            <button class="btn btn-warning" onclick="updateCallStatus('${call.callId || call.id}', 'In Progress', '${call.source}')">In Progress</button>
+                            <button class="btn btn-success" onclick="updateCallStatus('${call.callId || call.id}', 'On Scene', '${call.source}')">On Scene</button>
+                            ${call.source === 'Simulation' ? `<button class="btn btn-danger" onclick="closeCall('${call.callId || call.id}')">Close</button>` : ''}
+                        </div>
+                        <div class="units-list">
+                            ${call.assignedUnits ? call.assignedUnits.map(unit => `<span class="unit-tag">${unit}</span>`).join('') : ''}
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            `;
+        }
+        
+        async function refreshCalls() {
+            await loadCallsPanel();
+            showNotification('Calls refreshed', 'success');
+        }
+        
+        // Attach user to a call
+        async function attachToCall(callId, source) {
+            try {
+                // Get all calls to find the specific call
+                const allCalls = await getAllActiveCalls();
+                const call = allCalls.find(c => c.id === callId);
+                
+                if (!call) {
+                    showNotification('Call not found', 'error');
+                    return;
+                }
+                
+                // Store the attached call in localStorage
+                localStorage.setItem('attachedCall', JSON.stringify({
+                    callId: call.id,
+                    source: call.source,
+                    attachedAt: new Date().toISOString()
+                }));
+                
+                // Update the Active Incident section
+                updateActiveIncident(call);
+                
+                showNotification(`Attached to call ${callId}`, 'success');
+                
+                // Refresh the calls panel to show attachment status
+                await loadCallsPanel();
+                
+            } catch (error) {
+                console.error('Error attaching to call:', error);
+                showNotification('Failed to attach to call', 'error');
+            }
+        }
+        
+        // Update Active Incident section with call details
+        function updateActiveIncident(call) {
+            const incidentDetails = document.querySelector('.incident-details');
+            
+            if (!incidentDetails) return;
+            
+            // Update the incident details with call information
+            incidentDetails.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">Incident Type:</div>
+                    <div class="detail-value">${call.description || call.callType || '911 Call'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Inc #:</div>
+                    <div class="detail-value">${call.id}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Mod Circum:</div>
+                    <div class="detail-value">${call.priority}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Location:</div>
+                    <div class="detail-value">${call.location}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Loc Name:</div>
+                    <div class="detail-value">${call.location.split(',')[0] || 'Unknown'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Incident Status:</div>
+                    <div class="detail-value">${call.status}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Apt/Unit:</div>
+                    <div class="detail-value">${call.assignedUnits ? call.assignedUnits.join(', ') : 'None'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Report #:</div>
+                    <div class="detail-value">${call.id}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">City:</div>
+                    <div class="detail-value">LA</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Description:</div>
+                    <div class="detail-value">${call.narrative || call.description || 'No description available'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Cross Streets:</div>
+                    <div class="detail-value">${call.location}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Caller:</div>
+                    <div class="detail-value">${call.callerName || 'Unknown'} (${call.callerPhone || 'N/A'})</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Created:</div>
+                    <div class="detail-value">${new Date(call.createdAt).toLocaleString()}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Source:</div>
+                    <div class="detail-value">${call.source}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Actions:</div>
+                    <div class="detail-value">
+                        <button class="btn btn-sm btn-warning" onclick="detachFromCall()">Detach</button>
+                        <button class="btn btn-sm btn-primary" onclick="refreshAttachedCall()">Refresh</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Clear Active Incident section (show empty/default values)
+        function clearActiveIncident() {
+            const incidentDetails = document.querySelector('.incident-details');
+            if (incidentDetails) {
+                incidentDetails.innerHTML = `
+                    <div class="detail-row">
+                        <div class="detail-label">Incident Type:</div>
+                        <div class="detail-value">No Active Call</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Inc #:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Mod Circum:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Location:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Loc Name:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Incident Status:</div>
+                        <div class="detail-value">Available</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Apt/Unit:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Report #:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">City:</div>
+                        <div class="detail-value">LA</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Description:</div>
+                        <div class="detail-value">No active incident</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Cross Streets:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Caller:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Created:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Source:</div>
+                        <div class="detail-value">--</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Detach from current call
+        function detachFromCall() {
+            localStorage.removeItem('attachedCall');
+            
+            // Clear Active Incident
+            clearActiveIncident();
+            
+            showNotification('Detached from call', 'success');
+            loadCallsPanel(); // Refresh to update button states
+        }
+        
+        // Refresh attached call data
+        async function refreshAttachedCall() {
+            const attachedCallData = localStorage.getItem('attachedCall');
+            if (!attachedCallData) {
+                clearActiveIncident();
+                return;
+            }
+            
+            try {
+                const { callId } = JSON.parse(attachedCallData);
+                const allCalls = await getAllActiveCalls();
+                const call = allCalls.find(c => c.id === callId);
+                
+                if (call) {
+                    updateActiveIncident(call);
+                } else {
+                    // Call no longer exists - clear attachment and Active Incident
+                    localStorage.removeItem('attachedCall');
+                    clearActiveIncident();
+                }
+            } catch (error) {
+                console.error('Error refreshing attached call:', error);
+                localStorage.removeItem('attachedCall');
+                clearActiveIncident();
+            }
+        }
+        
+        async function assignRandomUnit(callId, source) {
+            const units = ['2G20-W5', '2G25-W5', '2G21-W5', '5G70-W5', '5G62-W5', '5G63-W5', '21G30-W7', '21G31-W7'];
+            const randomUnit = units[Math.floor(Math.random() * units.length)];
+            
+            try {
+                let response;
+                if (source === 'Simulation') {
+                    response = await fetch(`/simulation/calls/${callId}/assign`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ unitId: randomUnit })
+                    });
+                } else {
+                    // For SonoranCAD calls, we can't assign units via API
+                    showNotification('Unit assignment not available for SonoranCAD calls', 'warning');
+                    return;
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification(`Unit ${randomUnit} assigned to call`, 'success');
+                    await loadCallsPanel();
+                } else {
+                    showNotification('Failed to assign unit: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error assigning unit:', error);
+                showNotification('Failed to assign unit', 'error');
+            }
+        }
+        
+        async function updateCallStatus(callId, status, source) {
+            try {
+                let response;
+                if (source === 'Simulation') {
+                    response = await fetch(`/simulation/calls/${callId}/status`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status })
+                    });
+                } else {
+                    // For SonoranCAD calls, we can't update status via API
+                    showNotification('Status update not available for SonoranCAD calls', 'warning');
+                    return;
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification(`Call status updated to ${status}`, 'success');
+                    await loadCallsPanel();
+                } else {
+                    showNotification('Failed to update status: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showNotification('Failed to update status', 'error');
+            }
+        }
+        
+        async function closeCall(callId) {
+            if (!confirm('Are you sure you want to close this call?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/simulation/calls/${callId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Call closed successfully', 'success');
+                    await loadCallsPanel();
+                } else {
+                    showNotification('Failed to close call: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error closing call:', error);
+                showNotification('Failed to close call', 'error');
+            }
+        }
+        
+        // Initialize status indicators
+        updateConnectionStatus('Connecting...');
+        updateUnreadCount(0);
+        
+        // Add click handlers for status buttons
+        document.getElementById('nightMode').addEventListener('click', toggleNightMode);
+        document.getElementById('vehicleStatus').addEventListener('click', function() {
+            const statuses = ['In Vehicle', 'On Foot', 'At Station'];
+            const current = this.textContent;
+            const nextIndex = (statuses.indexOf(current) + 1) % statuses.length;
+            updateVehicleStatus(statuses[nextIndex]);
+        });
+        document.getElementById('enrouteStatus').addEventListener('click', function() {
+            const statuses = ['Enroute', 'On Scene', 'Available'];
+            const current = this.textContent;
+            const nextIndex = (statuses.indexOf(current) + 1) % statuses.length;
+            updateEnrouteStatus(statuses[nextIndex]);
+        });
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Page hidden - pausing updates');
+            } else {
+                console.log('Page visible - resuming updates');
+            }
+        });
+        
+        // Initialize page - check for attached calls
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user has an attached call
+            const attachedCallData = localStorage.getItem('attachedCall');
+            if (attachedCallData) {
+                try {
+                    const { callId } = JSON.parse(attachedCallData);
+                    // Try to refresh the attached call data
+                    refreshAttachedCall();
+                } catch (error) {
+                    console.error('Error loading attached call:', error);
+                    localStorage.removeItem('attachedCall');
+                    // Clear Active Incident if attachment data is corrupted
+                    clearActiveIncident();
+                }
+            } else {
+                // No call attached - clear Active Incident
+                clearActiveIncident();
+            }
+            
+            // Check if user needs to set SonoranCAD UUID
+            checkSonoranUuidStatus();
+        });
+
+        // SonoranCAD UUID Modal Functions
+        function showSonoranUuidModal() {
+            const modal = document.getElementById('sonoranUuidModal');
+            modal.style.display = 'block';
+            
+            // Focus on callsign input field
+            setTimeout(() => {
+                document.getElementById('callsignInput').focus();
+            }, 100);
+        }
+
+
+        async function saveSonoranProfile() {
+            const callsignInput = document.getElementById('callsignInput');
+            const nameInput = document.getElementById('nameInput');
+            const rankInput = document.getElementById('rankInput');
+            
+            const callsign = callsignInput.value.trim();
+            const name = nameInput.value.trim();
+            const rank = rankInput.value;
+            
+            // Validate required fields
+            if (!callsign) {
+                showNotification('Please enter your callsign', 'error');
+                return;
+            }
+            
+            if (!name) {
+                showNotification('Please enter your full name', 'error');
+                return;
+            }
+            
+            if (!rank) {
+                showNotification('Please select your patrol rank', 'error');
+                return;
+            }
+            
+            try {
+                // Save profile data to cookie (UUID is already in database)
+                const profileData = {
+                    callsign: callsign,
+                    name: name,
+                    rank: rank,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Set cookie for 30 days
+                const cookieValue = JSON.stringify(profileData);
+                document.cookie = `sonoranProfile=${encodeURIComponent(cookieValue)}; max-age=${30 * 24 * 60 * 60}; path=/; secure; samesite=strict`;
+                
+                showNotification('SonoranCAD profile saved successfully!', 'success');
+                
+                // Hide modal after successful save
+                const modal = document.getElementById('sonoranUuidModal');
+                modal.style.display = 'none';
+                
+                // Clear form inputs
+                document.getElementById('callsignInput').value = '';
+                document.getElementById('nameInput').value = '';
+                document.getElementById('rankInput').value = '';
+                
+                // Update UUID button to show it's set
+                updateUuidButtonStatus(true);
+                
+                // Update UI with profile data
+                updateProfileDisplay(profileData);
+                
+                // Wait 2 seconds then automatically change callsign
+                setTimeout(async () => {
+                    try {
+                        console.log('🔄 Automatically changing callsign after profile save...');
+                        const changeResponse = await fetch('/api/change-callsign', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                callsign: callsign,
+                                name: name,
+                                rank: rank
+                            })
+                        });
+                        
+                        const changeResult = await changeResponse.json();
+                        
+                        if (changeResult.success) {
+                            showNotification('Callsign automatically updated in SonoranCAD!', 'success');
+                            console.log('✅ Callsign change successful:', changeResult.response);
+                        } else {
+                            showNotification('Profile saved but callsign update failed: ' + changeResult.error, 'warning');
+                            console.error('❌ Callsign change failed:', changeResult.error);
+                        }
+                    } catch (changeError) {
+                        console.error('❌ Error during automatic callsign change:', changeError);
+                        showNotification('Profile saved but callsign update failed', 'warning');
+                    }
+                }, 2000); // Wait 2 seconds
+                
+            } catch (error) {
+                console.error('Error saving SonoranCAD profile:', error);
+                showNotification('Failed to save profile', 'error');
+            }
+        }
+
+        async function checkSonoranUuidStatus() {
+            try {
+                // First, try to load existing profile from cookie
+                const existingProfile = loadProfileFromCookie();
+                
+                const response = await fetch('/auth/profile');
+                const result = await response.json();
+                
+                if (result.success && result.user) {
+                    updateUuidButtonStatus(result.user.hasSonoranUuid);
+                    
+                    // If UUID is set but profile is incomplete, show modal
+                    if (result.user.hasSonoranUuid && !isProfileComplete()) {
+                        setTimeout(() => {
+                            showSonoranUuidModal();
+                        }, 2000); // Show after 2 seconds
+                    }
+                    // If UUID is not set, show modal
+                    else if (!result.user.hasSonoranUuid) {
+                        setTimeout(() => {
+                            showSonoranUuidModal();
+                        }, 2000); // Show after 2 seconds
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking SonoranCAD UUID status:', error);
+            }
+        }
+
+        function updateUuidButtonStatus(hasUuid) {
+            const uuidBtn = document.getElementById('sonoranUuidBtn');
+            if (uuidBtn) {
+                if (hasUuid) {
+                    uuidBtn.textContent = 'UUID ✓';
+                    uuidBtn.style.backgroundColor = '#27ae60';
+                    uuidBtn.title = 'SonoranCAD UUID is set';
+                } else {
+                    uuidBtn.textContent = 'UUID';
+                    uuidBtn.style.backgroundColor = '#f39c12';
+                    uuidBtn.title = 'Set SonoranCAD UUID';
+                }
+            }
+        }
+
+        // Load profile data from cookie
+        function loadProfileFromCookie() {
+            try {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === 'sonoranProfile') {
+                        const profileData = JSON.parse(decodeURIComponent(value));
+                        updateProfileDisplay(profileData);
+                        return profileData;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile from cookie:', error);
+            }
+            return null;
+        }
+
+        // Update UI with profile data
+        function updateProfileDisplay(profileData) {
+            // Update top bar with callsign
+            const appTitle = document.querySelector('.app-title');
+            if (appTitle && profileData.callsign) {
+                appTitle.textContent = `${profileData.callsign} - PremierOne Mobile Client`;
+            }
+
+            // Update status indicators with rank
+            const rankIndicator = document.getElementById('rankStatus');
+            if (rankIndicator && profileData.rank) {
+                rankIndicator.textContent = profileData.rank;
+            }
+
+            // Store profile data globally for other functions
+            window.sonoranProfile = profileData;
+        }
+
+        // Check if profile is complete
+        function isProfileComplete() {
+            const profile = loadProfileFromCookie();
+            return profile && profile.callsign && profile.name && profile.rank;
+        }
+
+        // Clear profile cookie when page unloads
+        function clearProfileCookie() {
+            document.cookie = 'sonoranProfile=; max-age=0; path=/; secure; samesite=strict';
+        }
+
+        // Set up page unload event listeners
+        window.addEventListener('beforeunload', clearProfileCookie);
+        window.addEventListener('unload', clearProfileCookie);
+        
+        // Also clear on page hide (for mobile browsers)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                clearProfileCookie();
+            }
+        });
+    </script>
+</body>
+</html>
