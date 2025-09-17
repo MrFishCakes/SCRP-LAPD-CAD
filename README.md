@@ -6,7 +6,7 @@ A complete Computer-Aided Dispatch (CAD) system integrating FiveM with a modern 
 
 ### Web Application
 - **Discord OAuth Authentication** - Secure login with Discord accounts
-- **Admin Panel** - User management, session tracking, and analytics
+- **User Management** - Session tracking and analytics
 - **Real-time Call Management** - Live 911 call tracking and dispatch
 - **Session Management** - Secure cookie-based authentication with Redis caching
 - **API Integration** - SonoranCAD webhook integration for real-time updates
@@ -127,7 +127,6 @@ set cad_api_key "your-api-key"
 - `npm run diagnose` - Diagnose Discord OAuth issues
 - `npm run test-analytics` - Test analytics functionality
 - `npm run create-sessions` - Create sessions for existing users
-- `npm run manage-admin` - Manage admin access
 - `npm run rebuild-db` - Rebuild database
 
 ## 📊 Features Overview
@@ -136,7 +135,7 @@ set cad_api_key "your-api-key"
 - **Discord OAuth** - Secure authentication via Discord
 - **Signed Cookies** - Cryptographically secure session management
 - **Session Tracking** - Detailed user session monitoring
-- **Admin Access** - Role-based access control
+- **User Authentication** - Secure access control
 
 ### Call Management
 - **Real-time Updates** - Instant call notifications
@@ -153,7 +152,7 @@ set cad_api_key "your-api-key"
 ## 🔗 Integration Flow
 
 ```
-SonoranCAD → FiveM Script → Web App → Admin Panel
+SonoranCAD → FiveM Script → Web App → User Interface
      ↓            ↓           ↓          ↓
   911 Call    Webhook     Redis     Real-time
   Created     HTTP POST   Storage   Updates

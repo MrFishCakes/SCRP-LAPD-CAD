@@ -1022,7 +1022,7 @@ YERKEY SERIAL 35188</div>
                     </select>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn btn-primary" onclick="saveSonoranProfile()">Save Profile</button>
+                    <button class="btn btn-primary" id="saveProfileBtn">Save Profile</button>
                 </div>
             </div>
         </div>
@@ -2104,6 +2104,15 @@ Units assigned: ${call.assignedUnits ? call.assignedUnits.join(', ') : 'None'}`;
             
             // Check if user needs to set SonoranCAD UUID
             checkSonoranUuidStatus();
+            
+            // Add event listener for save profile button
+            const saveProfileBtn = document.getElementById('saveProfileBtn');
+            if (saveProfileBtn) {
+                saveProfileBtn.addEventListener('click', saveSonoranProfile);
+                console.log('✅ Save Profile button event listener attached');
+            } else {
+                console.error('❌ Save Profile button not found');
+            }
         });
 
         // SonoranCAD UUID Modal Functions
@@ -2119,9 +2128,17 @@ Units assigned: ${call.assignedUnits ? call.assignedUnits.join(', ') : 'None'}`;
 
 
         async function saveSonoranProfile() {
+            console.log('🖱️ Save Profile button clicked');
+            
             const callsignInput = document.getElementById('callsignInput');
             const nameInput = document.getElementById('nameInput');
             const rankInput = document.getElementById('rankInput');
+            
+            console.log('📝 Form elements found:', {
+                callsignInput: !!callsignInput,
+                nameInput: !!nameInput,
+                rankInput: !!rankInput
+            });
             
             const callsign = callsignInput.value.trim();
             const name = nameInput.value.trim();
@@ -2144,6 +2161,8 @@ Units assigned: ${call.assignedUnits ? call.assignedUnits.join(', ') : 'None'}`;
             }
             
             try {
+                console.log('💾 Saving SonoranCAD profile:', { callsign, name, rank });
+                
                 // Save profile data to cookie (UUID is already in database)
                 const profileData = {
                     callsign: callsign,
@@ -2154,7 +2173,17 @@ Units assigned: ${call.assignedUnits ? call.assignedUnits.join(', ') : 'None'}`;
                 
                 // Set cookie for 30 days
                 const cookieValue = JSON.stringify(profileData);
-                document.cookie = `sonoranProfile=${encodeURIComponent(cookieValue)}; max-age=${30 * 24 * 60 * 60}; path=/; secure; samesite=strict`;
+                const isSecure = window.location.protocol === 'https:';
+                const cookieString = `sonoranProfile=${encodeURIComponent(cookieValue)}; max-age=${30 * 24 * 60 * 60}; path=/; ${isSecure ? 'secure; ' : ''}samesite=strict`;
+                
+                console.log('🍪 Setting cookie:', cookieString);
+                document.cookie = cookieString;
+                
+                // Verify cookie was set
+                setTimeout(() => {
+                    const savedCookie = document.cookie.split(';').find(c => c.trim().startsWith('sonoranProfile='));
+                    console.log('✅ Cookie verification:', savedCookie ? 'Cookie set successfully' : 'Cookie not found');
+                }, 100);
                 
                 showNotification('SonoranCAD profile saved successfully!', 'success');
                 
